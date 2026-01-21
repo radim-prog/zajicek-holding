@@ -85,6 +85,17 @@
         .detail-btn.disconnect:hover { background: #ff8fb3; }
         .detail-btn.delete { background: #ff6b6b; color: #fff; }
         .detail-btn.delete:hover { background: #ff8888; }
+
+        /* DPH indicator styles */
+        .dph-indicator { stroke: #fff; stroke-width: 2px; }
+        .dph-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 600; margin-top: 8px; }
+        .dph-badge.platce { background: rgba(0,212,170,0.2); color: #00d4aa; }
+        .dph-badge.proces { background: rgba(255,217,61,0.2); color: #ffd93d; }
+        .dph-badge.neplatce { background: rgba(255,107,107,0.2); color: #ff6b6b; }
+        .dph-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .legend-dph { margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .legend-dph-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; color: #999; font-size: 0.75em; }
+        .legend-dph-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; }
     </style>
 </head>
 <body>
@@ -109,6 +120,12 @@
         <div class="legend-item"><div class="legend-circle" style="background: #a29bfe;"></div> Vnukovská firma</div>
         <div class="legend-item"><div class="legend-circle" style="background: #00b894;"></div> Přímo vlastněná</div>
         <div class="legend-item"><div class="legend-circle" style="background: #e17055;"></div> Externí (mimo strukturu)</div>
+        <div class="legend-dph">
+            <div class="legend-title">DPH Status</div>
+            <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #00d4aa;"></div> Plátce DPH</div>
+            <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #ffd93d;"></div> V procesu registrace</div>
+            <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #ff6b6b;"></div> Neplátce DPH</div>
+        </div>
     </div>
     <div class="controls">
         <button class="control-btn add-btn" id="addCompanyBtn" title="Přidat firmu">+</button>
@@ -160,6 +177,15 @@
                 <label>Popis / Účel firmy</label>
                 <textarea id="modalPopis" placeholder="K čemu firma slouží..."></textarea>
             </div>
+            <div class="modal-field">
+                <label>DPH Status</label>
+                <select id="modalDph">
+                    <option value="">-- Nezadáno --</option>
+                    <option value="platce">Plátce DPH</option>
+                    <option value="proces">V procesu registrace</option>
+                    <option value="neplatce">Neplátce DPH</option>
+                </select>
+            </div>
             <div class="modal-buttons">
                 <button class="modal-btn secondary" id="modalCancel">Zrušit</button>
                 <button class="modal-btn primary" id="modalSave">Uložit</button>
@@ -192,23 +218,27 @@
     <script>
         // ============ DEFAULT DATA ============
         const defaultNodes = [
-            { id: "radim", name: "Radim Zajíček", type: "person", ico: null, sidlo: "Lukavice 76", founded: null, kapital: null, cinnost: "Fyzická osoba - majitel", popis: "Zakladatel a majitel celé holdingové struktury", nickname: "" },
-            { id: "holding", name: "Zajíček Holding s.r.o.", type: "holding", ico: "23078375", sidlo: "Školská 660/3, Praha", founded: "18.3.2025", kapital: "20 000 Kč", cinnost: "Správa vlastního majetku", popis: "Hlavní mateřská společnost - drží podíly v ostatních firmách", nickname: "" },
-            { id: "zck", name: "ZCK s.r.o.", type: "standalone", ico: "25999168", sidlo: "Nové sady 988/2, Brno", founded: "8.11.2003", kapital: "200 000 Kč", cinnost: "Pronájem nemovitostí", popis: "Nejstarší firma - pronájem nemovitostí v Brně", nickname: "" },
-            { id: "market4auto", name: "Market4auto, s.r.o.", type: "standalone", ico: "21829381", sidlo: "Korunní 2569/108h, Praha", founded: "17.7.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive skupina - mateřská firma pro Car4Auto", nickname: "" },
-            { id: "consulting", name: "Zajíček Consulting s.r.o.", type: "subholding", ico: "07343957", sidlo: "Nové sady 988/2, Brno", founded: "3.8.2018", kapital: "1 Kč", cinnost: "Pronájem nemovitostí", popis: "Sub-holding pro servisní a automotive firmy", nickname: "" },
-            { id: "wikiporadce", name: "WikiPoradce.cz s.r.o.", type: "daughter", ico: "07835027", sidlo: "Bělehradská 858/23, Praha", founded: "24.1.2019", kapital: "10 000 Kč", cinnost: "Obchod a služby", popis: "Provozovatel webu wikiporadce.cz", nickname: "" },
-            { id: "arstono", name: "ARSTONO s.r.o.", type: "daughter", ico: "23673371", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "10 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - reality a poradenství", nickname: "" },
-            { id: "altro", name: "Altro Servis Group s.r.o.", type: "daughter", ico: "23673389", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - servisní služby", nickname: "" },
-            { id: "kaldaro", name: "Kaldaro s.r.o.", type: "daughter", ico: "23799137", sidlo: "Školská 660/3, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "" },
-            { id: "kortado", name: "Kortado group s.r.o.", type: "daughter", ico: "23799145", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "" },
-            { id: "ardono", name: "Ardono group s.r.o.", type: "daughter", ico: "23799153", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "" },
-            { id: "car4auto", name: "Car4Auto s.r.o.", type: "granddaughter", ico: "23673397", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Automotive - dcera Market4auto", nickname: "" },
-            { id: "carmakler", name: "CAR makléř, s.r.o.", type: "granddaughter", ico: "21957151", sidlo: "Školská 660/3, Praha", founded: "23.8.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive makléřství", nickname: "" },
-            { id: "novira", name: "Novira Servis Group s.r.o.", type: "granddaughter", ico: "24111929", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Servisní skupina - nová firma 2026", nickname: "" },
-            { id: "alvento", name: "Alvento Solutions s.r.o.", type: "granddaughter", ico: "24111953", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Solutions firma - nová firma 2026", nickname: "" },
-            { id: "carmakler_ins", name: "CAR makléř insurance s.r.o.", type: "external", ico: "", sidlo: "", founded: "", kapital: "", cinnost: "Pojištění", popis: "Vlastní manželka - plánované připojení pod CAR makléř", nickname: "" }
+            { id: "radim", name: "Radim Zajíček", type: "person", ico: null, sidlo: "Lukavice 76", founded: null, kapital: null, cinnost: "Fyzická osoba - majitel", popis: "Zakladatel a majitel celé holdingové struktury", nickname: "", dphStatus: "" },
+            { id: "holding", name: "Zajíček Holding s.r.o.", type: "holding", ico: "23078375", sidlo: "Školská 660/3, Praha", founded: "18.3.2025", kapital: "20 000 Kč", cinnost: "Správa vlastního majetku", popis: "Hlavní mateřská společnost - drží podíly v ostatních firmách", nickname: "", dphStatus: "" },
+            { id: "zck", name: "ZCK s.r.o.", type: "standalone", ico: "25999168", sidlo: "Nové sady 988/2, Brno", founded: "8.11.2003", kapital: "200 000 Kč", cinnost: "Pronájem nemovitostí", popis: "Nejstarší firma - pronájem nemovitostí v Brně", nickname: "", dphStatus: "" },
+            { id: "market4auto", name: "Market4auto, s.r.o.", type: "standalone", ico: "21829381", sidlo: "Korunní 2569/108h, Praha", founded: "17.7.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive skupina - mateřská firma pro Car4Auto", nickname: "", dphStatus: "" },
+            { id: "consulting", name: "Zajíček Consulting s.r.o.", type: "subholding", ico: "07343957", sidlo: "Nové sady 988/2, Brno", founded: "3.8.2018", kapital: "1 Kč", cinnost: "Pronájem nemovitostí", popis: "Sub-holding pro servisní a automotive firmy", nickname: "", dphStatus: "" },
+            { id: "wikiporadce", name: "WikiPoradce.cz s.r.o.", type: "daughter", ico: "07835027", sidlo: "Bělehradská 858/23, Praha", founded: "24.1.2019", kapital: "10 000 Kč", cinnost: "Obchod a služby", popis: "Provozovatel webu wikiporadce.cz", nickname: "", dphStatus: "" },
+            { id: "arstono", name: "ARSTONO s.r.o.", type: "daughter", ico: "23673371", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "10 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - reality a poradenství", nickname: "", dphStatus: "" },
+            { id: "altro", name: "Altro Servis Group s.r.o.", type: "daughter", ico: "23673389", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - servisní služby", nickname: "", dphStatus: "" },
+            { id: "kaldaro", name: "Kaldaro s.r.o.", type: "daughter", ico: "23799137", sidlo: "Školská 660/3, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "", dphStatus: "" },
+            { id: "kortado", name: "Kortado group s.r.o.", type: "daughter", ico: "23799145", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "", dphStatus: "" },
+            { id: "ardono", name: "Ardono group s.r.o.", type: "daughter", ico: "23799153", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "", dphStatus: "" },
+            { id: "car4auto", name: "Car4Auto s.r.o.", type: "granddaughter", ico: "23673397", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Automotive - dcera Market4auto", nickname: "", dphStatus: "" },
+            { id: "carmakler", name: "CAR makléř, s.r.o.", type: "granddaughter", ico: "21957151", sidlo: "Školská 660/3, Praha", founded: "23.8.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive makléřství", nickname: "", dphStatus: "" },
+            { id: "novira", name: "Novira Servis Group s.r.o.", type: "granddaughter", ico: "24111929", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Servisní skupina - nová firma 2026", nickname: "", dphStatus: "" },
+            { id: "alvento", name: "Alvento Solutions s.r.o.", type: "granddaughter", ico: "24111953", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Solutions firma - nová firma 2026", nickname: "", dphStatus: "" },
+            { id: "carmakler_ins", name: "CAR makléř insurance s.r.o.", type: "external", ico: "", sidlo: "", founded: "", kapital: "", cinnost: "Pojištění", popis: "Vlastní manželka - plánované připojení pod CAR makléř", nickname: "", dphStatus: "" }
         ];
+
+        // DPH status colors and labels
+        const dphColors = { platce: "#00d4aa", proces: "#ffd93d", neplatce: "#ff6b6b" };
+        const dphLabels = { platce: "Plátce DPH", proces: "V procesu registrace", neplatce: "Neplátce DPH" };
 
         const defaultLinks = [
             { source: "radim", target: "holding", share: "100%" },
@@ -271,7 +301,7 @@
         function saveData() {
             const nodesToSave = nodes.map(n => ({
                 id: n.id, name: n.name, type: n.type, ico: n.ico, sidlo: n.sidlo,
-                founded: n.founded, kapital: n.kapital, cinnost: n.cinnost, popis: n.popis, nickname: n.nickname
+                founded: n.founded, kapital: n.kapital, cinnost: n.cinnost, popis: n.popis, nickname: n.nickname, dphStatus: n.dphStatus || ""
             }));
             const linksToSave = links.map(l => ({
                 source: typeof l.source === 'object' ? l.source.id : l.source,
@@ -440,6 +470,15 @@
                 .attr("fill", d => colors[d.type] || "#888")
                 .attr("stroke", d => d3.color(colors[d.type] || "#888").darker(0.5));
 
+            // DPH indicator dot
+            node.filter(d => d.dphStatus && dphColors[d.dphStatus])
+                .append("circle")
+                .attr("class", "dph-indicator")
+                .attr("r", 7)
+                .attr("cx", d => (sizes[d.type] || 25) * 0.7)
+                .attr("cy", d => -(sizes[d.type] || 25) * 0.7)
+                .attr("fill", d => dphColors[d.dphStatus]);
+
             node.append("text").attr("dy", -5).attr("text-anchor", "middle")
                 .text(d => d.name.replace(" s.r.o.", "").replace(", s.r.o.", "").split(" ").slice(0, 2).join(" "));
 
@@ -511,6 +550,17 @@
                 icoDiv.className = "detail-ico";
                 icoDiv.textContent = "IČO: " + d.ico;
                 header.appendChild(icoDiv);
+            }
+
+            if (d.dphStatus && dphLabels[d.dphStatus]) {
+                const dphDiv = document.createElement("div");
+                dphDiv.className = "dph-badge " + d.dphStatus;
+                const dot = document.createElement("span");
+                dot.className = "dph-dot";
+                dot.style.background = dphColors[d.dphStatus];
+                dphDiv.appendChild(dot);
+                dphDiv.appendChild(document.createTextNode(dphLabels[d.dphStatus]));
+                header.appendChild(dphDiv);
             }
 
             if (d.popis) {
@@ -685,6 +735,7 @@
             document.getElementById("modalShare").value = "100%";
             document.getElementById("modalSidlo").value = "";
             document.getElementById("modalPopis").value = "";
+            document.getElementById("modalDph").value = "";
             populateOwnerSelect(document.getElementById("modalOwner"), null);
             document.getElementById("companyModal").classList.add("open");
         }
@@ -697,6 +748,7 @@
             document.getElementById("modalType").value = d.type;
             document.getElementById("modalSidlo").value = d.sidlo || "";
             document.getElementById("modalPopis").value = d.popis || "";
+            document.getElementById("modalDph").value = d.dphStatus || "";
             populateOwnerSelect(document.getElementById("modalOwner"), d.id);
 
             const currentLink = links.find(l => l.target && l.target.id === d.id);
@@ -714,6 +766,7 @@
             const ico = document.getElementById("modalIco").value.trim();
             const sidlo = document.getElementById("modalSidlo").value.trim();
             const popis = document.getElementById("modalPopis").value.trim();
+            const dphStatus = document.getElementById("modalDph").value;
             const ownerId = document.getElementById("modalOwner").value;
             const share = document.getElementById("modalShare").value.trim() || "100%";
 
@@ -724,6 +777,7 @@
                 editingNode.ico = ico;
                 editingNode.sidlo = sidlo;
                 editingNode.popis = popis;
+                editingNode.dphStatus = dphStatus;
 
                 // Update link
                 const existingLinkIdx = links.findIndex(l => l.target && l.target.id === editingNode.id);
@@ -742,7 +796,7 @@
                 // Create new
                 const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 20) + '_' + Date.now();
                 const newNode = {
-                    id, name, type, ico, sidlo, popis,
+                    id, name, type, ico, sidlo, popis, dphStatus,
                     founded: "", kapital: "", cinnost: "", nickname: "",
                     x: centerX + (Math.random() - 0.5) * 300,
                     y: 400 + (Math.random() - 0.5) * 200
