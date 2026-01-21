@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zajíček Holding - Struktura firem</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #0f0f23; min-height: 100vh; overflow: hidden; }
+        .header { position: fixed; top: 0; left: 0; right: 0; padding: 20px 30px; background: linear-gradient(to bottom, rgba(15,15,35,0.95), rgba(15,15,35,0)); z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { color: #fff; font-size: 1.5em; font-weight: 600; }
+        .header-stats { display: flex; gap: 30px; }
+        .stat { text-align: center; }
+        .stat-value { color: #00d4aa; font-size: 1.8em; font-weight: 700; }
+        .stat-label { color: #666; font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; }
+        #graph { width: 100vw; height: 100vh; }
+        .link { fill: none; stroke-opacity: 0.6; }
+        .link-label { font-size: 10px; fill: #888; pointer-events: none; }
+        .node { cursor: pointer; }
+        .node circle { stroke-width: 3px; transition: all 0.3s ease; }
+        .node:hover circle { filter: brightness(1.3); stroke-width: 4px; }
+        .node text { font-size: 11px; font-weight: 500; fill: #fff; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+        .node .ico { font-size: 9px; fill: #aaa; font-weight: 400; }
+        .node .nickname { font-size: 10px; fill: #ffd93d; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+        .nickname-input { background: rgba(0,0,0,0.8); border: 2px solid #ffd93d; border-radius: 4px; color: #ffd93d; font-size: 10px; font-weight: 600; text-align: center; padding: 2px 5px; outline: none; width: 80px; }
+        .detail-panel { position: fixed; right: -420px; top: 0; width: 400px; height: 100vh; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); box-shadow: -5px 0 30px rgba(0,0,0,0.5); padding: 30px; transition: right 0.3s ease; z-index: 200; overflow-y: auto; }
+        .detail-panel.open { right: 0; }
+        .detail-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: #666; font-size: 24px; cursor: pointer; }
+        .detail-close:hover { color: #fff; }
+        .detail-header { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .detail-type { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.7em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .detail-name { color: #fff; font-size: 1.4em; font-weight: 600; margin-bottom: 5px; }
+        .detail-ico { color: #888; font-size: 0.9em; }
+        .detail-popis { color: #00d4aa; font-size: 1em; margin-top: 10px; padding: 12px; background: rgba(0,212,170,0.1); border-radius: 8px; border-left: 3px solid #00d4aa; }
+        .detail-section { margin-bottom: 20px; }
+        .detail-section h3 { color: #00d4aa; font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .detail-row-label { color: #888; font-size: 0.85em; }
+        .detail-row-value { color: #fff; font-size: 0.85em; text-align: right; max-width: 60%; }
+        .ownership-chain { background: rgba(0,212,170,0.1); border-radius: 10px; padding: 15px; margin-top: 10px; }
+        .ownership-item { display: flex; align-items: center; padding: 8px 0; color: #fff; font-size: 0.85em; }
+        .ownership-arrow { color: #00d4aa; margin: 0 10px; text-align: center; }
+        .ownership-percent { color: #00d4aa; font-weight: 600; margin-left: auto; }
+        .legend { position: fixed; bottom: 20px; left: 20px; background: rgba(26,26,46,0.9); padding: 15px 20px; border-radius: 10px; z-index: 100; }
+        .legend-title { color: #888; font-size: 0.7em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .legend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; color: #ccc; font-size: 0.8em; }
+        .legend-circle { width: 14px; height: 14px; border-radius: 50%; }
+        .controls { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 100; }
+        .control-btn { width: 40px; height: 40px; border-radius: 10px; border: none; background: rgba(26,26,46,0.9); color: #fff; font-size: 18px; cursor: pointer; transition: all 0.2s; }
+        .control-btn:hover { background: #00d4aa; color: #0f0f23; }
+        .control-btn.add-btn { background: #00d4aa; color: #0f0f23; font-weight: bold; }
+        .control-btn.add-btn:hover { background: #00ffcc; }
+        .tooltip { position: fixed; padding: 10px 15px; background: rgba(0,0,0,0.9); color: #fff; border-radius: 8px; font-size: 12px; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 300; }
+        .tooltip.visible { opacity: 1; }
+
+        /* Modal styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 15px; padding: 30px; width: 450px; max-width: 90vw; max-height: 90vh; overflow-y: auto; }
+        .modal h2 { color: #fff; margin-bottom: 20px; font-size: 1.3em; }
+        .modal-field { margin-bottom: 15px; }
+        .modal-field label { display: block; color: #888; font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .modal-field input, .modal-field select, .modal-field textarea { width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 0.95em; }
+        .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: #00d4aa; }
+        .modal-field select { cursor: pointer; }
+        .modal-field textarea { resize: vertical; min-height: 60px; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 25px; }
+        .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 0.95em; cursor: pointer; transition: all 0.2s; }
+        .modal-btn.primary { background: #00d4aa; color: #0f0f23; font-weight: 600; }
+        .modal-btn.primary:hover { background: #00ffcc; }
+        .modal-btn.secondary { background: rgba(255,255,255,0.1); color: #fff; }
+        .modal-btn.secondary:hover { background: rgba(255,255,255,0.2); }
+        .modal-btn.danger { background: #ff6b6b; color: #fff; }
+        .modal-btn.danger:hover { background: #ff8888; }
+
+        /* Detail panel buttons */
+        .detail-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .detail-btn { padding: 8px 15px; border: none; border-radius: 6px; font-size: 0.8em; cursor: pointer; transition: all 0.2s; }
+        .detail-btn.edit { background: #6c5ce7; color: #fff; }
+        .detail-btn.edit:hover { background: #7d6df0; }
+        .detail-btn.change-owner { background: #ffd93d; color: #000; }
+        .detail-btn.change-owner:hover { background: #ffe566; }
+        .detail-btn.disconnect { background: #fd79a8; color: #fff; }
+        .detail-btn.disconnect:hover { background: #ff8fb3; }
+        .detail-btn.delete { background: #ff6b6b; color: #fff; }
+        .detail-btn.delete:hover { background: #ff8888; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Zajíček Holding - Vlastnická struktura</h1>
+        <div class="header-stats">
+            <div class="stat"><div class="stat-value" id="statCount">0</div><div class="stat-label">Aktivních firem</div></div>
+            <div class="stat"><div class="stat-value" id="statLevels">0</div><div class="stat-label">Úrovně</div></div>
+        </div>
+    </div>
+    <div id="graph"></div>
+    <div class="detail-panel" id="detailPanel">
+        <button class="detail-close" id="closeBtn">&times;</button>
+        <div id="detailContent"></div>
+    </div>
+    <div class="legend">
+        <div class="legend-title">Legenda</div>
+        <div class="legend-item"><div class="legend-circle" style="background: #00d4aa;"></div> Fyzická osoba</div>
+        <div class="legend-item"><div class="legend-circle" style="background: #ff6b6b;"></div> Hlavní holding</div>
+        <div class="legend-item"><div class="legend-circle" style="background: #ffd93d;"></div> Sub-holding</div>
+        <div class="legend-item"><div class="legend-circle" style="background: #6c5ce7;"></div> Dceřiná firma</div>
+        <div class="legend-item"><div class="legend-circle" style="background: #a29bfe;"></div> Vnukovská firma</div>
+        <div class="legend-item"><div class="legend-circle" style="background: #00b894;"></div> Přímo vlastněná</div>
+        <div class="legend-item"><div class="legend-circle" style="background: #e17055;"></div> Externí (mimo strukturu)</div>
+    </div>
+    <div class="controls">
+        <button class="control-btn add-btn" id="addCompanyBtn" title="Přidat firmu">+</button>
+        <button class="control-btn" id="zoomInBtn" title="Přiblížit">⊕</button>
+        <button class="control-btn" id="zoomOutBtn" title="Oddálit">⊖</button>
+        <button class="control-btn" id="resetBtn" title="Reset zoomu">⟲</button>
+        <button class="control-btn" id="resetPosBtn" title="Reset pozic" style="font-size: 12px;">↺</button>
+    </div>
+    <div class="tooltip" id="tooltip"></div>
+
+    <!-- Modal pro přidání/editaci firmy -->
+    <div class="modal-overlay" id="companyModal">
+        <div class="modal">
+            <h2 id="modalTitle">Přidat firmu</h2>
+            <div class="modal-field">
+                <label>Název firmy *</label>
+                <input type="text" id="modalName" placeholder="např. Nová firma s.r.o.">
+            </div>
+            <div class="modal-field">
+                <label>IČO</label>
+                <input type="text" id="modalIco" placeholder="např. 12345678">
+            </div>
+            <div class="modal-field">
+                <label>Typ</label>
+                <select id="modalType">
+                    <option value="daughter">Dceřiná společnost</option>
+                    <option value="granddaughter">Vnukovská společnost</option>
+                    <option value="subholding">Sub-holding</option>
+                    <option value="standalone">Přímo vlastněná</option>
+                    <option value="external">Externí (mimo strukturu)</option>
+                    <option value="person">Fyzická osoba</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Vlastník</label>
+                <select id="modalOwner">
+                    <option value="">-- Bez vlastníka (nezávislá) --</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Podíl</label>
+                <input type="text" id="modalShare" placeholder="100%" value="100%">
+            </div>
+            <div class="modal-field">
+                <label>Sídlo</label>
+                <input type="text" id="modalSidlo" placeholder="např. Školská 660/3, Praha">
+            </div>
+            <div class="modal-field">
+                <label>Popis / Účel firmy</label>
+                <textarea id="modalPopis" placeholder="K čemu firma slouží..."></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" id="modalCancel">Zrušit</button>
+                <button class="modal-btn primary" id="modalSave">Uložit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pro změnu vlastníka -->
+    <div class="modal-overlay" id="ownerModal">
+        <div class="modal">
+            <h2>Změnit vlastníka</h2>
+            <p style="color: #888; margin-bottom: 20px;" id="ownerModalInfo"></p>
+            <div class="modal-field">
+                <label>Nový vlastník</label>
+                <select id="ownerModalSelect">
+                    <option value="">-- Bez vlastníka (odpojit) --</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Podíl</label>
+                <input type="text" id="ownerModalShare" placeholder="100%" value="100%">
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" id="ownerModalCancel">Zrušit</button>
+                <button class="modal-btn primary" id="ownerModalSave">Uložit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ DEFAULT DATA ============
+        const defaultNodes = [
+            { id: "radim", name: "Radim Zajíček", type: "person", ico: null, sidlo: "Lukavice 76", founded: null, kapital: null, cinnost: "Fyzická osoba - majitel", popis: "Zakladatel a majitel celé holdingové struktury", nickname: "" },
+            { id: "holding", name: "Zajíček Holding s.r.o.", type: "holding", ico: "23078375", sidlo: "Školská 660/3, Praha", founded: "18.3.2025", kapital: "20 000 Kč", cinnost: "Správa vlastního majetku", popis: "Hlavní mateřská společnost - drží podíly v ostatních firmách", nickname: "" },
+            { id: "zck", name: "ZCK s.r.o.", type: "standalone", ico: "25999168", sidlo: "Nové sady 988/2, Brno", founded: "8.11.2003", kapital: "200 000 Kč", cinnost: "Pronájem nemovitostí", popis: "Nejstarší firma - pronájem nemovitostí v Brně", nickname: "" },
+            { id: "market4auto", name: "Market4auto, s.r.o.", type: "standalone", ico: "21829381", sidlo: "Korunní 2569/108h, Praha", founded: "17.7.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive skupina - mateřská firma pro Car4Auto", nickname: "" },
+            { id: "consulting", name: "Zajíček Consulting s.r.o.", type: "subholding", ico: "07343957", sidlo: "Nové sady 988/2, Brno", founded: "3.8.2018", kapital: "1 Kč", cinnost: "Pronájem nemovitostí", popis: "Sub-holding pro servisní a automotive firmy", nickname: "" },
+            { id: "wikiporadce", name: "WikiPoradce.cz s.r.o.", type: "daughter", ico: "07835027", sidlo: "Bělehradská 858/23, Praha", founded: "24.1.2019", kapital: "10 000 Kč", cinnost: "Obchod a služby", popis: "Provozovatel webu wikiporadce.cz", nickname: "" },
+            { id: "arstono", name: "ARSTONO s.r.o.", type: "daughter", ico: "23673371", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "10 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - reality a poradenství", nickname: "" },
+            { id: "altro", name: "Altro Servis Group s.r.o.", type: "daughter", ico: "23673389", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - servisní služby", nickname: "" },
+            { id: "kaldaro", name: "Kaldaro s.r.o.", type: "daughter", ico: "23799137", sidlo: "Školská 660/3, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "" },
+            { id: "kortado", name: "Kortado group s.r.o.", type: "daughter", ico: "23799145", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "" },
+            { id: "ardono", name: "Ardono group s.r.o.", type: "daughter", ico: "23799153", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "" },
+            { id: "car4auto", name: "Car4Auto s.r.o.", type: "granddaughter", ico: "23673397", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Automotive - dcera Market4auto", nickname: "" },
+            { id: "carmakler", name: "CAR makléř, s.r.o.", type: "granddaughter", ico: "21957151", sidlo: "Školská 660/3, Praha", founded: "23.8.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive makléřství", nickname: "" },
+            { id: "novira", name: "Novira Servis Group s.r.o.", type: "granddaughter", ico: "24111929", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Servisní skupina - nová firma 2026", nickname: "" },
+            { id: "alvento", name: "Alvento Solutions s.r.o.", type: "granddaughter", ico: "24111953", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Solutions firma - nová firma 2026", nickname: "" },
+            { id: "carmakler_ins", name: "CAR makléř insurance s.r.o.", type: "external", ico: "", sidlo: "", founded: "", kapital: "", cinnost: "Pojištění", popis: "Vlastní manželka - plánované připojení pod CAR makléř", nickname: "" }
+        ];
+
+        const defaultLinks = [
+            { source: "radim", target: "holding", share: "100%" },
+            { source: "radim", target: "zck", share: "100%" },
+            { source: "radim", target: "market4auto", share: "100%" },
+            { source: "holding", target: "consulting", share: "100%" },
+            { source: "holding", target: "wikiporadce", share: "100%" },
+            { source: "holding", target: "arstono", share: "100%" },
+            { source: "holding", target: "altro", share: "100%" },
+            { source: "holding", target: "kaldaro", share: "100%" },
+            { source: "holding", target: "kortado", share: "100%" },
+            { source: "holding", target: "ardono", share: "100%" },
+            { source: "market4auto", target: "car4auto", share: "100%" },
+            { source: "consulting", target: "carmakler", share: "100%" },
+            { source: "consulting", target: "novira", share: "100%" },
+            { source: "consulting", target: "alvento", share: "100%" }
+        ];
+
+        const defaultPositions = {
+            radim: { x: 960, y: 120 },
+            holding: { x: 960, y: 280 },
+            zck: { x: 610, y: 280 },
+            market4auto: { x: 1310, y: 280 },
+            consulting: { x: 760, y: 450 },
+            wikiporadce: { x: 1010, y: 450 },
+            arstono: { x: 1160, y: 450 },
+            altro: { x: 1310, y: 450 },
+            kaldaro: { x: 1460, y: 450 },
+            kortado: { x: 610, y: 530 },
+            ardono: { x: 460, y: 450 },
+            car4auto: { x: 1410, y: 450 },
+            carmakler: { x: 610, y: 620 },
+            novira: { x: 760, y: 620 },
+            alvento: { x: 910, y: 620 },
+            carmakler_ins: { x: 610, y: 750 }
+        };
+
+        // ============ STORAGE ============
+        const STORAGE_KEY_NODES = 'zajicek-holding-nodes';
+        const STORAGE_KEY_LINKS = 'zajicek-holding-links';
+        const STORAGE_KEY_POSITIONS = 'zajicek-holding-positions';
+        const STORAGE_KEY_NICKNAMES = 'zajicek-holding-nicknames';
+
+        function loadData() {
+            try {
+                const savedNodes = localStorage.getItem(STORAGE_KEY_NODES);
+                const savedLinks = localStorage.getItem(STORAGE_KEY_LINKS);
+
+                if (savedNodes && savedLinks) {
+                    return {
+                        nodes: JSON.parse(savedNodes),
+                        links: JSON.parse(savedLinks)
+                    };
+                }
+            } catch (e) { console.error('Load error:', e); }
+
+            return { nodes: JSON.parse(JSON.stringify(defaultNodes)), links: JSON.parse(JSON.stringify(defaultLinks)) };
+        }
+
+        function saveData() {
+            const nodesToSave = nodes.map(n => ({
+                id: n.id, name: n.name, type: n.type, ico: n.ico, sidlo: n.sidlo,
+                founded: n.founded, kapital: n.kapital, cinnost: n.cinnost, popis: n.popis, nickname: n.nickname
+            }));
+            const linksToSave = links.map(l => ({
+                source: typeof l.source === 'object' ? l.source.id : l.source,
+                target: typeof l.target === 'object' ? l.target.id : l.target,
+                share: l.share
+            }));
+            localStorage.setItem(STORAGE_KEY_NODES, JSON.stringify(nodesToSave));
+            localStorage.setItem(STORAGE_KEY_LINKS, JSON.stringify(linksToSave));
+        }
+
+        function loadPositions() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY_POSITIONS);
+                return saved ? JSON.parse(saved) : null;
+            } catch (e) { return null; }
+        }
+
+        function savePositions() {
+            const posData = {};
+            nodes.forEach(n => { posData[n.id] = { x: n.x, y: n.y }; });
+            localStorage.setItem(STORAGE_KEY_POSITIONS, JSON.stringify(posData));
+        }
+
+        function loadNicknames() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY_NICKNAMES);
+                return saved ? JSON.parse(saved) : null;
+            } catch (e) { return null; }
+        }
+
+        function saveNicknames() {
+            const nickData = {};
+            nodes.forEach(n => { nickData[n.id] = n.nickname || ""; });
+            localStorage.setItem(STORAGE_KEY_NICKNAMES, JSON.stringify(nickData));
+        }
+
+        // ============ INIT DATA ============
+        const data = loadData();
+        const nodes = data.nodes;
+        const links = data.links;
+
+        const colors = { person: "#00d4aa", holding: "#ff6b6b", subholding: "#ffd93d", daughter: "#6c5ce7", granddaughter: "#a29bfe", standalone: "#00b894", external: "#e17055" };
+        const sizes = { person: 45, holding: 40, subholding: 35, daughter: 28, granddaughter: 24, standalone: 30, external: 25 };
+        const typeLabels = { person: "Fyzická osoba", holding: "Hlavní holding", subholding: "Sub-holding", daughter: "Dceřiná společnost", granddaughter: "Vnukovská společnost", standalone: "Přímo vlastněná", external: "Externí" };
+
+        const width = window.innerWidth, height = window.innerHeight;
+        const centerX = width / 2;
+
+        // Apply positions
+        const savedPositions = loadPositions();
+        const savedNicknames = loadNicknames();
+
+        nodes.forEach(n => {
+            if (savedPositions && savedPositions[n.id]) {
+                n.x = savedPositions[n.id].x;
+                n.y = savedPositions[n.id].y;
+            } else if (defaultPositions[n.id]) {
+                n.x = defaultPositions[n.id].x;
+                n.y = defaultPositions[n.id].y;
+            } else {
+                n.x = centerX + (Math.random() - 0.5) * 200;
+                n.y = 400 + (Math.random() - 0.5) * 200;
+            }
+            n.fx = n.x;
+            n.fy = n.y;
+
+            if (savedNicknames && savedNicknames[n.id]) {
+                n.nickname = savedNicknames[n.id];
+            }
+        });
+
+        // Update stats
+        function updateStats() {
+            document.getElementById('statCount').textContent = nodes.length;
+            // Calculate levels
+            let maxLevel = 0;
+            nodes.forEach(n => {
+                let level = 0;
+                let current = n.id;
+                while (current) {
+                    const linkToParent = links.find(l => (typeof l.target === 'object' ? l.target.id : l.target) === current);
+                    if (linkToParent) {
+                        level++;
+                        current = typeof linkToParent.source === 'object' ? linkToParent.source.id : linkToParent.source;
+                    } else break;
+                }
+                if (level > maxLevel) maxLevel = level;
+            });
+            document.getElementById('statLevels').textContent = maxLevel + 1;
+        }
+        updateStats();
+
+        // ============ D3 SETUP ============
+        const svg = d3.select("#graph").append("svg").attr("width", width).attr("height", height);
+        const g = svg.append("g");
+        const zoom = d3.zoom().scaleExtent([0.3, 3]).on("zoom", (e) => g.attr("transform", e.transform));
+        svg.call(zoom);
+
+        svg.append("defs").append("marker").attr("id", "arrowhead").attr("viewBox", "-0 -5 10 10").attr("refX", 20).attr("refY", 0).attr("orient", "auto").attr("markerWidth", 8).attr("markerHeight", 8).append("path").attr("d", "M 0,-5 L 10,0 L 0,5").attr("fill", "#555");
+
+        // Process links
+        const nodeById = new Map(nodes.map(n => [n.id, n]));
+        links.forEach(l => {
+            if (typeof l.source === 'string') l.source = nodeById.get(l.source);
+            if (typeof l.target === 'string') l.target = nodeById.get(l.target);
+        });
+
+        // Create link groups
+        const linkGroup = g.append("g").attr("class", "links");
+        const linkLabelGroup = g.append("g").attr("class", "link-labels");
+        const nodeGroup = g.append("g").attr("class", "nodes");
+
+        function render() {
+            // Clear and re-render
+            linkGroup.selectAll("*").remove();
+            linkLabelGroup.selectAll("*").remove();
+            nodeGroup.selectAll("*").remove();
+
+            // Filter valid links
+            const validLinks = links.filter(l => l.source && l.target);
+
+            // Links
+            const link = linkGroup.selectAll("line").data(validLinks).enter().append("line")
+                .attr("class", "link").attr("stroke", "#555").attr("stroke-width", 2).attr("marker-end", "url(#arrowhead)")
+                .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+
+            // Link labels
+            const linkLabel = linkLabelGroup.selectAll("text").data(validLinks).enter().append("text")
+                .attr("class", "link-label").text(d => d.share)
+                .attr("x", d => (d.source.x + d.target.x) / 2)
+                .attr("y", d => (d.source.y + d.target.y) / 2 - 5);
+
+            // Nodes
+            const node = nodeGroup.selectAll(".node").data(nodes).enter().append("g").attr("class", "node")
+                .attr("transform", d => "translate(" + d.x + "," + d.y + ")")
+                .call(d3.drag()
+                    .on("start", function(e, d) { d3.select(this).raise(); })
+                    .on("drag", function(e, d) {
+                        d.x = e.x; d.y = e.y;
+                        d.fx = e.x; d.fy = e.y;
+                        d3.select(this).attr("transform", "translate(" + d.x + "," + d.y + ")");
+                        link.filter(l => l.source === d).attr("x1", d.x).attr("y1", d.y);
+                        link.filter(l => l.target === d).attr("x2", d.x).attr("y2", d.y);
+                        linkLabel.filter(l => l.source === d || l.target === d)
+                            .attr("x", l => (l.source.x + l.target.x) / 2)
+                            .attr("y", l => (l.source.y + l.target.y) / 2 - 5);
+                    })
+                    .on("end", function(e, d) { savePositions(); }))
+                .on("click", function(e, d) {
+                    if (this.clickTimer) { clearTimeout(this.clickTimer); this.clickTimer = null; return; }
+                    const self = this;
+                    this.clickTimer = setTimeout(function() { self.clickTimer = null; showDetail(d); }, 250);
+                })
+                .on("mouseover", (e, d) => {
+                    const t = document.getElementById("tooltip");
+                    t.textContent = d.name + (d.ico ? " (IČO: " + d.ico + ")" : "");
+                    t.style.left = (e.pageX + 15) + "px";
+                    t.style.top = (e.pageY - 10) + "px";
+                    t.classList.add("visible");
+                })
+                .on("mouseout", () => document.getElementById("tooltip").classList.remove("visible"));
+
+            node.append("circle")
+                .attr("r", d => sizes[d.type] || 25)
+                .attr("fill", d => colors[d.type] || "#888")
+                .attr("stroke", d => d3.color(colors[d.type] || "#888").darker(0.5));
+
+            node.append("text").attr("dy", -5).attr("text-anchor", "middle")
+                .text(d => d.name.replace(" s.r.o.", "").replace(", s.r.o.", "").split(" ").slice(0, 2).join(" "));
+
+            node.append("text").attr("class", "ico").attr("dy", 10).attr("text-anchor", "middle").text(d => d.ico || "");
+
+            node.append("text").attr("class", "nickname").attr("dy", 25).attr("text-anchor", "middle")
+                .text(d => d.nickname || "").style("cursor", "text");
+
+            // Dvojklik pro nickname
+            node.on("dblclick", function(e, d) {
+                e.stopPropagation();
+                if (window.activeEditor) { window.activeEditor.remove(); window.activeEditor = null; }
+
+                const nodeEl = d3.select(this);
+                const nodeSize = sizes[d.type] || 25;
+
+                const fo = nodeEl.append("foreignObject").attr("x", -45).attr("y", nodeSize + 5).attr("width", 90).attr("height", 25);
+                const input = fo.append("xhtml:input").attr("type", "text").attr("class", "nickname-input")
+                    .attr("placeholder", "nickname...").attr("value", d.nickname || "").node();
+                window.activeEditor = fo;
+                setTimeout(() => input.focus(), 10);
+
+                function saveNicknameEdit() {
+                    d.nickname = input.value.trim();
+                    nodeEl.select(".nickname").text(d.nickname);
+                    saveNicknames();
+                    fo.remove();
+                    window.activeEditor = null;
+                }
+
+                input.addEventListener("keydown", function(ke) {
+                    if (ke.key === "Enter") saveNicknameEdit();
+                    else if (ke.key === "Escape") { fo.remove(); window.activeEditor = null; }
+                });
+                input.addEventListener("blur", function() { setTimeout(saveNicknameEdit, 100); });
+            });
+
+            updateStats();
+        }
+
+        render();
+
+        // ============ DETAIL PANEL ============
+        let currentDetailNode = null;
+
+        function showDetail(d) {
+            currentDetailNode = d;
+            const panel = document.getElementById("detailPanel");
+            const content = document.getElementById("detailContent");
+            content.replaceChildren();
+
+            const header = document.createElement("div");
+            header.className = "detail-header";
+
+            const typeSpan = document.createElement("div");
+            typeSpan.className = "detail-type";
+            typeSpan.style.background = colors[d.type] || "#888";
+            typeSpan.style.color = (d.type === "subholding" || d.type === "external") ? "#000" : "#fff";
+            typeSpan.textContent = typeLabels[d.type] || d.type;
+            header.appendChild(typeSpan);
+
+            const nameDiv = document.createElement("div");
+            nameDiv.className = "detail-name";
+            nameDiv.textContent = d.name;
+            header.appendChild(nameDiv);
+
+            if (d.ico) {
+                const icoDiv = document.createElement("div");
+                icoDiv.className = "detail-ico";
+                icoDiv.textContent = "IČO: " + d.ico;
+                header.appendChild(icoDiv);
+            }
+
+            if (d.popis) {
+                const popisDiv = document.createElement("div");
+                popisDiv.className = "detail-popis";
+                popisDiv.textContent = d.popis;
+                header.appendChild(popisDiv);
+            }
+
+            content.appendChild(header);
+
+            // Základní údaje
+            if (d.type !== "person") {
+                const section = document.createElement("div");
+                section.className = "detail-section";
+                const h3 = document.createElement("h3");
+                h3.textContent = "Základní údaje";
+                section.appendChild(h3);
+
+                [["Sídlo", d.sidlo], ["Založeno", d.founded], ["Základní kapitál", d.kapital], ["Předmět činnosti", d.cinnost]].forEach(([label, value]) => {
+                    if (value) {
+                        const row = document.createElement("div");
+                        row.className = "detail-row";
+                        const labelSpan = document.createElement("span");
+                        labelSpan.className = "detail-row-label";
+                        labelSpan.textContent = label;
+                        const valueSpan = document.createElement("span");
+                        valueSpan.className = "detail-row-value";
+                        valueSpan.textContent = value || "-";
+                        row.appendChild(labelSpan);
+                        row.appendChild(valueSpan);
+                        section.appendChild(row);
+                    }
+                });
+                content.appendChild(section);
+            }
+
+            // Ownership chain
+            let chain = [];
+            let current = d.id;
+            while (current) {
+                const linkToParent = links.find(l => l.target && l.target.id === current);
+                if (linkToParent && linkToParent.source) {
+                    chain.unshift({ name: linkToParent.source.name, share: linkToParent.share });
+                    current = linkToParent.source.id;
+                } else break;
+            }
+
+            if (chain.length > 0) {
+                const chainSection = document.createElement("div");
+                chainSection.className = "detail-section";
+                const h3 = document.createElement("h3");
+                h3.textContent = "Vlastnický řetězec";
+                chainSection.appendChild(h3);
+
+                const chainDiv = document.createElement("div");
+                chainDiv.className = "ownership-chain";
+                chain.forEach(c => {
+                    const item = document.createElement("div");
+                    item.className = "ownership-item";
+                    item.textContent = c.name;
+                    const pct = document.createElement("span");
+                    pct.className = "ownership-percent";
+                    pct.textContent = c.share;
+                    item.appendChild(pct);
+                    chainDiv.appendChild(item);
+                    const arrow = document.createElement("div");
+                    arrow.className = "ownership-arrow";
+                    arrow.textContent = "↓";
+                    chainDiv.appendChild(arrow);
+                });
+                const finalItem = document.createElement("div");
+                finalItem.className = "ownership-item";
+                finalItem.style.fontWeight = "600";
+                finalItem.textContent = d.name;
+                chainDiv.appendChild(finalItem);
+                chainSection.appendChild(chainDiv);
+                content.appendChild(chainSection);
+            }
+
+            // Subsidiaries
+            const subs = links.filter(l => l.source && l.source.id === d.id).map(l => ({
+                name: l.target.name, share: l.share
+            }));
+
+            if (subs.length > 0) {
+                const subSection = document.createElement("div");
+                subSection.className = "detail-section";
+                const h3 = document.createElement("h3");
+                h3.textContent = "Vlastní (" + subs.length + ")";
+                subSection.appendChild(h3);
+                subs.forEach(s => {
+                    const row = document.createElement("div");
+                    row.className = "detail-row";
+                    const labelSpan = document.createElement("span");
+                    labelSpan.className = "detail-row-label";
+                    labelSpan.textContent = s.name;
+                    const valueSpan = document.createElement("span");
+                    valueSpan.className = "detail-row-value";
+                    valueSpan.style.color = "#00d4aa";
+                    valueSpan.textContent = s.share;
+                    row.appendChild(labelSpan);
+                    row.appendChild(valueSpan);
+                    subSection.appendChild(row);
+                });
+                content.appendChild(subSection);
+            }
+
+            // Action buttons
+            const actions = document.createElement("div");
+            actions.className = "detail-actions";
+
+            const editBtn = document.createElement("button");
+            editBtn.className = "detail-btn edit";
+            editBtn.textContent = "✏️ Upravit";
+            editBtn.onclick = () => openEditModal(d);
+            actions.appendChild(editBtn);
+
+            if (d.type !== "person") {
+                const ownerBtn = document.createElement("button");
+                ownerBtn.className = "detail-btn change-owner";
+                ownerBtn.textContent = "🔗 Změnit vlastníka";
+                ownerBtn.onclick = () => openOwnerModal(d);
+                actions.appendChild(ownerBtn);
+
+                const currentLink = links.find(l => l.target && l.target.id === d.id);
+                if (currentLink) {
+                    const disconnectBtn = document.createElement("button");
+                    disconnectBtn.className = "detail-btn disconnect";
+                    disconnectBtn.textContent = "⛓️ Odpojit";
+                    disconnectBtn.onclick = () => disconnectNode(d);
+                    actions.appendChild(disconnectBtn);
+                }
+
+                const deleteBtn = document.createElement("button");
+                deleteBtn.className = "detail-btn delete";
+                deleteBtn.textContent = "🗑️ Smazat";
+                deleteBtn.onclick = () => deleteNode(d);
+                actions.appendChild(deleteBtn);
+            }
+
+            content.appendChild(actions);
+            panel.classList.add("open");
+        }
+
+        // ============ MODALS ============
+        let editingNode = null;
+
+        function populateOwnerSelect(selectEl, excludeId) {
+            selectEl.replaceChildren();
+            const emptyOpt = document.createElement("option");
+            emptyOpt.value = "";
+            emptyOpt.textContent = "-- Bez vlastníka (nezávislá) --";
+            selectEl.appendChild(emptyOpt);
+
+            nodes.forEach(n => {
+                if (n.id !== excludeId) {
+                    const opt = document.createElement("option");
+                    opt.value = n.id;
+                    opt.textContent = n.name;
+                    selectEl.appendChild(opt);
+                }
+            });
+        }
+
+        function openAddModal() {
+            editingNode = null;
+            document.getElementById("modalTitle").textContent = "Přidat firmu";
+            document.getElementById("modalName").value = "";
+            document.getElementById("modalIco").value = "";
+            document.getElementById("modalType").value = "daughter";
+            document.getElementById("modalShare").value = "100%";
+            document.getElementById("modalSidlo").value = "";
+            document.getElementById("modalPopis").value = "";
+            populateOwnerSelect(document.getElementById("modalOwner"), null);
+            document.getElementById("companyModal").classList.add("open");
+        }
+
+        function openEditModal(d) {
+            editingNode = d;
+            document.getElementById("modalTitle").textContent = "Upravit firmu";
+            document.getElementById("modalName").value = d.name;
+            document.getElementById("modalIco").value = d.ico || "";
+            document.getElementById("modalType").value = d.type;
+            document.getElementById("modalSidlo").value = d.sidlo || "";
+            document.getElementById("modalPopis").value = d.popis || "";
+            populateOwnerSelect(document.getElementById("modalOwner"), d.id);
+
+            const currentLink = links.find(l => l.target && l.target.id === d.id);
+            document.getElementById("modalOwner").value = currentLink ? currentLink.source.id : "";
+            document.getElementById("modalShare").value = currentLink ? currentLink.share : "100%";
+
+            document.getElementById("companyModal").classList.add("open");
+        }
+
+        function saveModal() {
+            const name = document.getElementById("modalName").value.trim();
+            if (!name) { alert("Název firmy je povinný!"); return; }
+
+            const type = document.getElementById("modalType").value;
+            const ico = document.getElementById("modalIco").value.trim();
+            const sidlo = document.getElementById("modalSidlo").value.trim();
+            const popis = document.getElementById("modalPopis").value.trim();
+            const ownerId = document.getElementById("modalOwner").value;
+            const share = document.getElementById("modalShare").value.trim() || "100%";
+
+            if (editingNode) {
+                // Update existing
+                editingNode.name = name;
+                editingNode.type = type;
+                editingNode.ico = ico;
+                editingNode.sidlo = sidlo;
+                editingNode.popis = popis;
+
+                // Update link
+                const existingLinkIdx = links.findIndex(l => l.target && l.target.id === editingNode.id);
+                if (ownerId) {
+                    const ownerNode = nodeById.get(ownerId);
+                    if (existingLinkIdx >= 0) {
+                        links[existingLinkIdx].source = ownerNode;
+                        links[existingLinkIdx].share = share;
+                    } else {
+                        links.push({ source: ownerNode, target: editingNode, share: share });
+                    }
+                } else {
+                    if (existingLinkIdx >= 0) links.splice(existingLinkIdx, 1);
+                }
+            } else {
+                // Create new
+                const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 20) + '_' + Date.now();
+                const newNode = {
+                    id, name, type, ico, sidlo, popis,
+                    founded: "", kapital: "", cinnost: "", nickname: "",
+                    x: centerX + (Math.random() - 0.5) * 300,
+                    y: 400 + (Math.random() - 0.5) * 200
+                };
+                newNode.fx = newNode.x;
+                newNode.fy = newNode.y;
+                nodes.push(newNode);
+                nodeById.set(id, newNode);
+
+                if (ownerId) {
+                    const ownerNode = nodeById.get(ownerId);
+                    links.push({ source: ownerNode, target: newNode, share: share });
+                }
+            }
+
+            saveData();
+            savePositions();
+            render();
+            document.getElementById("companyModal").classList.remove("open");
+            if (editingNode) showDetail(editingNode);
+        }
+
+        function openOwnerModal(d) {
+            document.getElementById("ownerModalInfo").textContent = "Firma: " + d.name;
+            populateOwnerSelect(document.getElementById("ownerModalSelect"), d.id);
+
+            const currentLink = links.find(l => l.target && l.target.id === d.id);
+            document.getElementById("ownerModalSelect").value = currentLink ? currentLink.source.id : "";
+            document.getElementById("ownerModalShare").value = currentLink ? currentLink.share : "100%";
+
+            document.getElementById("ownerModal").dataset.nodeId = d.id;
+            document.getElementById("ownerModal").classList.add("open");
+        }
+
+        function saveOwnerModal() {
+            const nodeId = document.getElementById("ownerModal").dataset.nodeId;
+            const node = nodeById.get(nodeId);
+            const newOwnerId = document.getElementById("ownerModalSelect").value;
+            const share = document.getElementById("ownerModalShare").value.trim() || "100%";
+
+            // Remove existing link
+            const existingLinkIdx = links.findIndex(l => l.target && l.target.id === nodeId);
+            if (existingLinkIdx >= 0) links.splice(existingLinkIdx, 1);
+
+            // Add new link if owner selected
+            if (newOwnerId) {
+                const ownerNode = nodeById.get(newOwnerId);
+                links.push({ source: ownerNode, target: node, share: share });
+            }
+
+            saveData();
+            render();
+            document.getElementById("ownerModal").classList.remove("open");
+            showDetail(node);
+        }
+
+        function disconnectNode(d) {
+            if (!confirm("Odpojit firmu " + d.name + " od vlastníka?")) return;
+
+            const linkIdx = links.findIndex(l => l.target && l.target.id === d.id);
+            if (linkIdx >= 0) {
+                links.splice(linkIdx, 1);
+                saveData();
+                render();
+                showDetail(d);
+            }
+        }
+
+        function deleteNode(d) {
+            if (!confirm("Opravdu smazat firmu " + d.name + "?\n\nToto také smaže všechny vazby na tuto firmu!")) return;
+
+            // Remove all links involving this node
+            for (let i = links.length - 1; i >= 0; i--) {
+                if ((links[i].source && links[i].source.id === d.id) || (links[i].target && links[i].target.id === d.id)) {
+                    links.splice(i, 1);
+                }
+            }
+
+            // Remove node
+            const nodeIdx = nodes.findIndex(n => n.id === d.id);
+            if (nodeIdx >= 0) nodes.splice(nodeIdx, 1);
+            nodeById.delete(d.id);
+
+            saveData();
+            render();
+            document.getElementById("detailPanel").classList.remove("open");
+        }
+
+        // ============ EVENT LISTENERS ============
+        document.getElementById("closeBtn").onclick = () => document.getElementById("detailPanel").classList.remove("open");
+        document.getElementById("addCompanyBtn").onclick = openAddModal;
+        document.getElementById("modalCancel").onclick = () => document.getElementById("companyModal").classList.remove("open");
+        document.getElementById("modalSave").onclick = saveModal;
+        document.getElementById("ownerModalCancel").onclick = () => document.getElementById("ownerModal").classList.remove("open");
+        document.getElementById("ownerModalSave").onclick = saveOwnerModal;
+
+        document.getElementById("zoomInBtn").onclick = () => svg.transition().call(zoom.scaleBy, 1.3);
+        document.getElementById("zoomOutBtn").onclick = () => svg.transition().call(zoom.scaleBy, 0.7);
+        document.getElementById("resetBtn").onclick = () => svg.transition().call(zoom.transform, d3.zoomIdentity);
+        document.getElementById("resetPosBtn").onclick = () => {
+            if (confirm("Resetovat všechny pozice na výchozí hodnoty?")) {
+                localStorage.removeItem(STORAGE_KEY_POSITIONS);
+                location.reload();
+            }
+        };
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                document.getElementById("detailPanel").classList.remove("open");
+                document.getElementById("companyModal").classList.remove("open");
+                document.getElementById("ownerModal").classList.remove("open");
+            }
+        });
+
+        // Close modals on overlay click
+        document.getElementById("companyModal").onclick = (e) => {
+            if (e.target.id === "companyModal") document.getElementById("companyModal").classList.remove("open");
+        };
+        document.getElementById("ownerModal").onclick = (e) => {
+            if (e.target.id === "ownerModal") document.getElementById("ownerModal").classList.remove("open");
+        };
+    </script>
+</body>
+</html>
