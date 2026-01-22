@@ -102,8 +102,8 @@
         .bubble { cursor: move; }
         .bubble circle { stroke-width: 2; stroke-dasharray: 8,4; fill-opacity: 0.05; }
         .bubble .bubble-label { font-size: 13px; font-weight: 600; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
-        .bubble .resize-handle { cursor: ns-resize; opacity: 0; transition: opacity 0.2s; }
-        .bubble:hover .resize-handle { opacity: 0.8; }
+        .bubble .resize-handle { cursor: ns-resize; opacity: 0.4; transition: opacity 0.2s; }
+        .bubble:hover .resize-handle { opacity: 1; }
         .bubble .delete-handle { cursor: pointer; opacity: 0; transition: opacity 0.2s; }
         .bubble:hover .delete-handle { opacity: 1; }
         .control-btn.bubble-btn { background: #6c5ce7; color: #fff; font-size: 14px; }
@@ -520,7 +520,7 @@
                 .attr("class", "resize-handle")
                 .attr("cx", 0)
                 .attr("cy", d => d.radius || 100)
-                .attr("r", 8)
+                .attr("r", 12)
                 .attr("fill", d => d.color)
                 .call(d3.drag()
                     .on("start", function(e) {
