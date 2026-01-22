@@ -107,6 +107,10 @@
         .bubble:hover .delete-handle { opacity: 1; }
         .control-btn.bubble-btn { background: #6c5ce7; color: #fff; font-size: 14px; }
         .control-btn.bubble-btn:hover { background: #7d6df0; }
+        .control-btn.export-btn { background: #00b894; font-size: 14px; }
+        .control-btn.export-btn:hover { background: #00d4aa; }
+        .control-btn.import-btn { background: #fdcb6e; color: #0f0f23; font-size: 14px; }
+        .control-btn.import-btn:hover { background: #ffeaa7; }
 
         /* Bubble modal */
         .bubble-color-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
@@ -151,6 +155,9 @@
         <button class="control-btn" id="zoomOutBtn" title="Oddálit">⊖</button>
         <button class="control-btn" id="resetBtn" title="Reset zoomu">⟲</button>
         <button class="control-btn" id="resetPosBtn" title="Reset pozic" style="font-size: 12px;">↺</button>
+        <button class="control-btn export-btn" id="exportBtn" title="Export dat">⬇</button>
+        <button class="control-btn import-btn" id="importBtn" title="Import dat">⬆</button>
+        <input type="file" id="importFile" accept=".json" style="display: none;">
     </div>
     <div class="tooltip" id="tooltip"></div>
 
@@ -1110,6 +1117,51 @@
                 localStorage.removeItem(STORAGE_KEY_POSITIONS);
                 location.reload();
             }
+        };
+
+        // Export data to JSON file
+        document.getElementById("exportBtn").onclick = function() {
+            const data = {
+                nodes: localStorage.getItem(STORAGE_KEY_NODES),
+                links: localStorage.getItem(STORAGE_KEY_LINKS),
+                positions: localStorage.getItem(STORAGE_KEY_POSITIONS),
+                nicknames: localStorage.getItem(STORAGE_KEY_NICKNAMES),
+                bubbles: localStorage.getItem(STORAGE_KEY_BUBBLES),
+                exportDate: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'zajicek-holding-backup.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        // Import data from JSON file
+        document.getElementById("importBtn").onclick = () => document.getElementById("importFile").click();
+        document.getElementById("importFile").onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.nodes) localStorage.setItem(STORAGE_KEY_NODES, data.nodes);
+                    if (data.links) localStorage.setItem(STORAGE_KEY_LINKS, data.links);
+                    if (data.positions) localStorage.setItem(STORAGE_KEY_POSITIONS, data.positions);
+                    if (data.nicknames) localStorage.setItem(STORAGE_KEY_NICKNAMES, data.nicknames);
+                    if (data.bubbles) localStorage.setItem(STORAGE_KEY_BUBBLES, data.bubbles);
+                    alert('Data úspěšně importována! Stránka se obnoví.');
+                    location.reload();
+                } catch (err) {
+                    alert('Chyba při importu: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = ''; // Reset input for re-import
         };
 
         document.addEventListener("keydown", (e) => {
