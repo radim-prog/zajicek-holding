@@ -85,6 +85,38 @@
         .detail-btn.disconnect:hover { background: #ff8fb3; }
         .detail-btn.delete { background: #ff6b6b; color: #fff; }
         .detail-btn.delete:hover { background: #ff8888; }
+
+        /* DPH indicator styles */
+        .dph-indicator { stroke: #fff; stroke-width: 2px; }
+        .dph-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 600; margin-top: 8px; }
+        .dph-badge.platce { background: rgba(0,212,170,0.2); color: #00d4aa; }
+        .dph-badge.proces { background: rgba(255,217,61,0.2); color: #ffd93d; }
+        .dph-badge.neplatce { background: rgba(255,107,107,0.2); color: #ff6b6b; }
+        .dph-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .legend-dph { margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .legend-dph-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; color: #999; font-size: 0.75em; }
+        .legend-dph-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; }
+
+        /* Bubble styles */
+        .bubble { cursor: move; }
+        .bubble rect { rx: 15; ry: 15; stroke-width: 2; stroke-dasharray: 5,3; }
+        .bubble text { font-size: 14px; font-weight: 600; pointer-events: none; }
+        .bubble .resize-handle { cursor: nwse-resize; opacity: 0; transition: opacity 0.2s; }
+        .bubble:hover .resize-handle { opacity: 1; }
+        .bubble .delete-handle { cursor: pointer; opacity: 0; transition: opacity 0.2s; }
+        .bubble:hover .delete-handle { opacity: 1; }
+        .control-btn.bubble-btn { background: #6c5ce7; color: #fff; font-size: 14px; }
+        .control-btn.bubble-btn:hover { background: #7d6df0; }
+        .control-btn.export-btn { background: #00b894; font-size: 14px; }
+        .control-btn.export-btn:hover { background: #00d4aa; }
+        .control-btn.import-btn { background: #fdcb6e; color: #0f0f23; font-size: 14px; }
+        .control-btn.import-btn:hover { background: #ffeaa7; }
+
+        /* Bubble modal */
+        .bubble-color-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .bubble-color-option { width: 32px; height: 32px; border-radius: 8px; cursor: pointer; border: 3px solid transparent; transition: all 0.2s; }
+        .bubble-color-option:hover { transform: scale(1.1); }
+        .bubble-color-option.selected { border-color: #fff; }
     </style>
 </head>
 <body>
@@ -109,13 +141,23 @@
         <div class="legend-item"><div class="legend-circle" style="background: #a29bfe;"></div> Vnukovská firma</div>
         <div class="legend-item"><div class="legend-circle" style="background: #00b894;"></div> Přímo vlastněná</div>
         <div class="legend-item"><div class="legend-circle" style="background: #e17055;"></div> Externí (mimo strukturu)</div>
+        <div class="legend-dph">
+            <div class="legend-title">DPH Status</div>
+            <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #00d4aa;"></div> Plátce DPH</div>
+            <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #ffd93d;"></div> V procesu registrace</div>
+            <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #ff6b6b;"></div> Neplátce DPH</div>
+        </div>
     </div>
     <div class="controls">
         <button class="control-btn add-btn" id="addCompanyBtn" title="Přidat firmu">+</button>
+        <button class="control-btn bubble-btn" id="addBubbleBtn" title="Přidat bublinu">⬭</button>
         <button class="control-btn" id="zoomInBtn" title="Přiblížit">⊕</button>
         <button class="control-btn" id="zoomOutBtn" title="Oddálit">⊖</button>
         <button class="control-btn" id="resetBtn" title="Reset zoomu">⟲</button>
         <button class="control-btn" id="resetPosBtn" title="Reset pozic" style="font-size: 12px;">↺</button>
+        <button class="control-btn export-btn" id="exportBtn" title="Export dat">⬇</button>
+        <button class="control-btn import-btn" id="importBtn" title="Import dat">⬆</button>
+        <input type="file" id="importFile" accept=".json" style="display: none;">
     </div>
     <div class="tooltip" id="tooltip"></div>
 
@@ -160,6 +202,15 @@
                 <label>Popis / Účel firmy</label>
                 <textarea id="modalPopis" placeholder="K čemu firma slouží..."></textarea>
             </div>
+            <div class="modal-field">
+                <label>DPH Status</label>
+                <select id="modalDph">
+                    <option value="">-- Nezadáno --</option>
+                    <option value="platce">Plátce DPH</option>
+                    <option value="proces">V procesu registrace</option>
+                    <option value="neplatce">Neplátce DPH</option>
+                </select>
+            </div>
             <div class="modal-buttons">
                 <button class="modal-btn secondary" id="modalCancel">Zrušit</button>
                 <button class="modal-btn primary" id="modalSave">Uložit</button>
@@ -189,26 +240,59 @@
         </div>
     </div>
 
+    <!-- Modal pro bublinu -->
+    <div class="modal-overlay" id="bubbleModal">
+        <div class="modal">
+            <h2 id="bubbleModalTitle">Přidat bublinu</h2>
+            <div class="modal-field">
+                <label>Název bubliny *</label>
+                <input type="text" id="bubbleName" placeholder="např. Projekt Alfa">
+            </div>
+            <div class="modal-field">
+                <label>Barva</label>
+                <div class="bubble-color-picker" id="bubbleColorPicker">
+                    <div class="bubble-color-option selected" data-color="#6c5ce7" style="background: rgba(108,92,231,0.3); border-color: #6c5ce7;"></div>
+                    <div class="bubble-color-option" data-color="#00d4aa" style="background: rgba(0,212,170,0.3); border-color: #00d4aa;"></div>
+                    <div class="bubble-color-option" data-color="#ffd93d" style="background: rgba(255,217,61,0.3); border-color: #ffd93d;"></div>
+                    <div class="bubble-color-option" data-color="#ff6b6b" style="background: rgba(255,107,107,0.3); border-color: #ff6b6b;"></div>
+                    <div class="bubble-color-option" data-color="#74b9ff" style="background: rgba(116,185,255,0.3); border-color: #74b9ff;"></div>
+                    <div class="bubble-color-option" data-color="#fd79a8" style="background: rgba(253,121,168,0.3); border-color: #fd79a8;"></div>
+                    <div class="bubble-color-option" data-color="#a29bfe" style="background: rgba(162,155,254,0.3); border-color: #a29bfe;"></div>
+                    <div class="bubble-color-option" data-color="#55efc4" style="background: rgba(85,239,196,0.3); border-color: #55efc4;"></div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" id="bubbleModalCancel">Zrušit</button>
+                <button class="modal-btn danger" id="bubbleModalDelete" style="display: none;">Smazat</button>
+                <button class="modal-btn primary" id="bubbleModalSave">Uložit</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============ DEFAULT DATA ============
         const defaultNodes = [
-            { id: "radim", name: "Radim Zajíček", type: "person", ico: null, sidlo: "Lukavice 76", founded: null, kapital: null, cinnost: "Fyzická osoba - majitel", popis: "Zakladatel a majitel celé holdingové struktury", nickname: "" },
-            { id: "holding", name: "Zajíček Holding s.r.o.", type: "holding", ico: "23078375", sidlo: "Školská 660/3, Praha", founded: "18.3.2025", kapital: "20 000 Kč", cinnost: "Správa vlastního majetku", popis: "Hlavní mateřská společnost - drží podíly v ostatních firmách", nickname: "" },
-            { id: "zck", name: "ZCK s.r.o.", type: "standalone", ico: "25999168", sidlo: "Nové sady 988/2, Brno", founded: "8.11.2003", kapital: "200 000 Kč", cinnost: "Pronájem nemovitostí", popis: "Nejstarší firma - pronájem nemovitostí v Brně", nickname: "" },
-            { id: "market4auto", name: "Market4auto, s.r.o.", type: "standalone", ico: "21829381", sidlo: "Korunní 2569/108h, Praha", founded: "17.7.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive skupina - mateřská firma pro Car4Auto", nickname: "" },
-            { id: "consulting", name: "Zajíček Consulting s.r.o.", type: "subholding", ico: "07343957", sidlo: "Nové sady 988/2, Brno", founded: "3.8.2018", kapital: "1 Kč", cinnost: "Pronájem nemovitostí", popis: "Sub-holding pro servisní a automotive firmy", nickname: "" },
-            { id: "wikiporadce", name: "WikiPoradce.cz s.r.o.", type: "daughter", ico: "07835027", sidlo: "Bělehradská 858/23, Praha", founded: "24.1.2019", kapital: "10 000 Kč", cinnost: "Obchod a služby", popis: "Provozovatel webu wikiporadce.cz", nickname: "" },
-            { id: "arstono", name: "ARSTONO s.r.o.", type: "daughter", ico: "23673371", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "10 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - reality a poradenství", nickname: "" },
-            { id: "altro", name: "Altro Servis Group s.r.o.", type: "daughter", ico: "23673389", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - servisní služby", nickname: "" },
-            { id: "kaldaro", name: "Kaldaro s.r.o.", type: "daughter", ico: "23799137", sidlo: "Školská 660/3, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "" },
-            { id: "kortado", name: "Kortado group s.r.o.", type: "daughter", ico: "23799145", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "" },
-            { id: "ardono", name: "Ardono group s.r.o.", type: "daughter", ico: "23799153", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "" },
-            { id: "car4auto", name: "Car4Auto s.r.o.", type: "granddaughter", ico: "23673397", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Automotive - dcera Market4auto", nickname: "" },
-            { id: "carmakler", name: "CAR makléř, s.r.o.", type: "granddaughter", ico: "21957151", sidlo: "Školská 660/3, Praha", founded: "23.8.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive makléřství", nickname: "" },
-            { id: "novira", name: "Novira Servis Group s.r.o.", type: "granddaughter", ico: "24111929", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Servisní skupina - nová firma 2026", nickname: "" },
-            { id: "alvento", name: "Alvento Solutions s.r.o.", type: "granddaughter", ico: "24111953", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Solutions firma - nová firma 2026", nickname: "" },
-            { id: "carmakler_ins", name: "CAR makléř insurance s.r.o.", type: "external", ico: "", sidlo: "", founded: "", kapital: "", cinnost: "Pojištění", popis: "Vlastní manželka - plánované připojení pod CAR makléř", nickname: "" }
+            { id: "radim", name: "Radim Zajíček", type: "person", ico: null, sidlo: "Lukavice 76", founded: null, kapital: null, cinnost: "Fyzická osoba - majitel", popis: "Zakladatel a majitel celé holdingové struktury", nickname: "", dphStatus: "" },
+            { id: "holding", name: "Zajíček Holding s.r.o.", type: "holding", ico: "23078375", sidlo: "Školská 660/3, Praha", founded: "18.3.2025", kapital: "20 000 Kč", cinnost: "Správa vlastního majetku", popis: "Hlavní mateřská společnost - drží podíly v ostatních firmách", nickname: "", dphStatus: "neplatce" },
+            { id: "zck", name: "ZCK s.r.o.", type: "standalone", ico: "25999168", sidlo: "Nové sady 988/2, Brno", founded: "8.11.2003", kapital: "200 000 Kč", cinnost: "Pronájem nemovitostí", popis: "Nejstarší firma - pronájem nemovitostí v Brně", nickname: "jde Pá", dphStatus: "platce" },
+            { id: "market4auto", name: "Market4auto, s.r.o.", type: "standalone", ico: "21829381", sidlo: "Korunní 2569/108h, Praha", founded: "17.7.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive skupina - mateřská firma pro Car4Auto", nickname: "Márty", dphStatus: "platce" },
+            { id: "consulting", name: "Zajíček Consulting s.r.o.", type: "subholding", ico: "07343957", sidlo: "Nové sady 988/2, Brno", founded: "3.8.2018", kapital: "1 Kč", cinnost: "Pronájem nemovitostí", popis: "Sub-holding pro servisní a automotive firmy", nickname: "", dphStatus: "platce" },
+            { id: "wikiporadce", name: "WikiPoradce.cz s.r.o.", type: "daughter", ico: "07835027", sidlo: "Bělehradská 858/23, Praha", founded: "24.1.2019", kapital: "10 000 Kč", cinnost: "Obchod a služby", popis: "Provozovatel webu wikiporadce.cz", nickname: "dostane J. Kubita", dphStatus: "platce" },
+            { id: "arstono", name: "ARSTONO s.r.o.", type: "daughter", ico: "23673371", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "10 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - reality a poradenství", nickname: "Hric", dphStatus: "proces" },
+            { id: "altro", name: "Altro Servis Group s.r.o.", type: "daughter", ico: "23673389", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - servisní služby", nickname: "Evžen", dphStatus: "neplatce" },
+            { id: "kaldaro", name: "Kaldaro s.r.o.", type: "daughter", ico: "23799137", sidlo: "Školská 660/3, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "volné (QS)", dphStatus: "" },
+            { id: "kortado", name: "Kortado group s.r.o.", type: "daughter", ico: "23799145", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "Hric kamos", dphStatus: "proces" },
+            { id: "ardono", name: "Ardono group s.r.o.", type: "daughter", ico: "23799153", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "volné", dphStatus: "neplatce" },
+            { id: "car4auto", name: "Car4Auto s.r.o.", type: "granddaughter", ico: "23673397", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Automotive - dcera Market4auto", nickname: "Márty II", dphStatus: "proces" },
+            { id: "carmakler", name: "CAR makléř, s.r.o.", type: "granddaughter", ico: "21957151", sidlo: "Školská 660/3, Praha", founded: "23.8.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive makléřství", nickname: "", dphStatus: "platce" },
+            { id: "novira", name: "Novira Servis Group s.r.o.", type: "granddaughter", ico: "24111929", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Servisní skupina - nová firma 2026", nickname: "Viktor II", dphStatus: "neplatce" },
+            { id: "alvento", name: "Alvento Solutions s.r.o.", type: "granddaughter", ico: "24111953", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Solutions firma - nová firma 2026", nickname: "Viktor", dphStatus: "neplatce" },
+            { id: "carmakler_ins", name: "CAR makléř insurance s.r.o.", type: "external", ico: "", sidlo: "", founded: "", kapital: "", cinnost: "Pojištění", popis: "Vlastní manželka - plánované připojení pod CAR makléř", nickname: "", dphStatus: "neplatce" }
         ];
+
+        // DPH status colors and labels
+        const dphColors = { platce: "#00d4aa", proces: "#ffd93d", neplatce: "#ff6b6b" };
+        const dphLabels = { platce: "Plátce DPH", proces: "V procesu registrace", neplatce: "Neplátce DPH" };
 
         const defaultLinks = [
             { source: "radim", target: "holding", share: "100%" },
@@ -228,22 +312,22 @@
         ];
 
         const defaultPositions = {
-            radim: { x: 960, y: 120 },
-            holding: { x: 960, y: 280 },
-            zck: { x: 610, y: 280 },
-            market4auto: { x: 1310, y: 280 },
-            consulting: { x: 760, y: 450 },
-            wikiporadce: { x: 1010, y: 450 },
-            arstono: { x: 1160, y: 450 },
-            altro: { x: 1310, y: 450 },
-            kaldaro: { x: 1460, y: 450 },
-            kortado: { x: 610, y: 530 },
-            ardono: { x: 460, y: 450 },
-            car4auto: { x: 1410, y: 450 },
-            carmakler: { x: 610, y: 620 },
-            novira: { x: 760, y: 620 },
-            alvento: { x: 910, y: 620 },
-            carmakler_ins: { x: 610, y: 750 }
+            radim: { x: 835, y: 120 },
+            holding: { x: 835, y: 280 },
+            zck: { x: 365, y: 11 },
+            market4auto: { x: 1021, y: -99 },
+            consulting: { x: 769, y: 499 },
+            wikiporadce: { x: 342, y: 166 },
+            arstono: { x: 1418, y: 100 },
+            altro: { x: 1151, y: 28 },
+            kaldaro: { x: 1238, y: 511 },
+            kortado: { x: 1412, y: 186 },
+            ardono: { x: 488, y: 372 },
+            car4auto: { x: 1083, y: -177 },
+            carmakler: { x: 816, y: 626 },
+            novira: { x: 475, y: 542 },
+            alvento: { x: 485, y: 461 },
+            carmakler_ins: { x: 856, y: 688 }
         };
 
         // ============ STORAGE ============
@@ -251,6 +335,7 @@
         const STORAGE_KEY_LINKS = 'zajicek-holding-links';
         const STORAGE_KEY_POSITIONS = 'zajicek-holding-positions';
         const STORAGE_KEY_NICKNAMES = 'zajicek-holding-nicknames';
+        const STORAGE_KEY_BUBBLES = 'zajicek-holding-bubbles';
 
         function loadData() {
             try {
@@ -271,7 +356,7 @@
         function saveData() {
             const nodesToSave = nodes.map(n => ({
                 id: n.id, name: n.name, type: n.type, ico: n.ico, sidlo: n.sidlo,
-                founded: n.founded, kapital: n.kapital, cinnost: n.cinnost, popis: n.popis, nickname: n.nickname
+                founded: n.founded, kapital: n.kapital, cinnost: n.cinnost, popis: n.popis, nickname: n.nickname, dphStatus: n.dphStatus || ""
             }));
             const linksToSave = links.map(l => ({
                 source: typeof l.source === 'object' ? l.source.id : l.source,
@@ -308,10 +393,22 @@
             localStorage.setItem(STORAGE_KEY_NICKNAMES, JSON.stringify(nickData));
         }
 
+        function loadBubbles() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY_BUBBLES);
+                return saved ? JSON.parse(saved) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveBubbles() {
+            localStorage.setItem(STORAGE_KEY_BUBBLES, JSON.stringify(bubbles));
+        }
+
         // ============ INIT DATA ============
         const data = loadData();
         const nodes = data.nodes;
         const links = data.links;
+        const bubbles = loadBubbles();
 
         const colors = { person: "#00d4aa", holding: "#ff6b6b", subholding: "#ffd93d", daughter: "#6c5ce7", granddaughter: "#a29bfe", standalone: "#00b894", external: "#e17055" };
         const sizes = { person: 45, holding: 40, subholding: 35, daughter: 28, granddaughter: 24, standalone: 30, external: 25 };
@@ -379,10 +476,82 @@
             if (typeof l.target === 'string') l.target = nodeById.get(l.target);
         });
 
-        // Create link groups
+        // Create groups (bubbles first = background)
+        const bubbleGroup = g.append("g").attr("class", "bubbles");
         const linkGroup = g.append("g").attr("class", "links");
         const linkLabelGroup = g.append("g").attr("class", "link-labels");
         const nodeGroup = g.append("g").attr("class", "nodes");
+
+        function renderBubbles() {
+            bubbleGroup.selectAll("*").remove();
+
+            const bubble = bubbleGroup.selectAll(".bubble").data(bubbles).enter().append("g")
+                .attr("class", "bubble")
+                .attr("transform", d => "translate(" + d.x + "," + d.y + ")")
+                .call(d3.drag()
+                    .on("drag", function(e, d) {
+                        d.x = e.x; d.y = e.y;
+                        d3.select(this).attr("transform", "translate(" + d.x + "," + d.y + ")");
+                    })
+                    .on("end", function() { saveBubbles(); }))
+                .on("click", function(e, d) {
+                    e.stopPropagation();
+                    openBubbleModal(d);
+                });
+
+            // Background rect
+            bubble.append("rect")
+                .attr("width", d => d.width)
+                .attr("height", d => d.height)
+                .attr("fill", d => d.color.replace(")", ",0.15)").replace("rgb", "rgba"))
+                .attr("stroke", d => d.color);
+
+            // Label
+            bubble.append("text")
+                .attr("x", 15)
+                .attr("y", 22)
+                .attr("fill", d => d.color)
+                .text(d => d.name);
+
+            // Resize handle (bottom-right corner)
+            bubble.append("rect")
+                .attr("class", "resize-handle")
+                .attr("x", d => d.width - 20)
+                .attr("y", d => d.height - 20)
+                .attr("width", 20)
+                .attr("height", 20)
+                .attr("fill", d => d.color)
+                .attr("rx", 5)
+                .call(d3.drag()
+                    .on("drag", function(e, d) {
+                        const parent = d3.select(this.parentNode);
+                        const minSize = 100;
+                        d.width = Math.max(minSize, e.x);
+                        d.height = Math.max(minSize, e.y);
+                        parent.select("rect:first-child").attr("width", d.width).attr("height", d.height);
+                        d3.select(this).attr("x", d.width - 20).attr("y", d.height - 20);
+                    })
+                    .on("end", function() { saveBubbles(); }));
+
+            // Delete handle (top-right corner)
+            bubble.append("text")
+                .attr("class", "delete-handle")
+                .attr("x", d => d.width - 20)
+                .attr("y", 20)
+                .attr("fill", "#ff6b6b")
+                .attr("font-size", "16px")
+                .attr("cursor", "pointer")
+                .text("✕")
+                .on("click", function(e, d) {
+                    e.stopPropagation();
+                    if (confirm("Smazat bublinu '" + d.name + "'?")) {
+                        const idx = bubbles.findIndex(b => b.id === d.id);
+                        if (idx >= 0) bubbles.splice(idx, 1);
+                        saveBubbles();
+                        renderBubbles();
+                    }
+                });
+        }
 
         function render() {
             // Clear and re-render
@@ -440,6 +609,15 @@
                 .attr("fill", d => colors[d.type] || "#888")
                 .attr("stroke", d => d3.color(colors[d.type] || "#888").darker(0.5));
 
+            // DPH indicator dot
+            node.filter(d => d.dphStatus && dphColors[d.dphStatus])
+                .append("circle")
+                .attr("class", "dph-indicator")
+                .attr("r", 7)
+                .attr("cx", d => (sizes[d.type] || 25) * 0.7)
+                .attr("cy", d => -(sizes[d.type] || 25) * 0.7)
+                .attr("fill", d => dphColors[d.dphStatus]);
+
             node.append("text").attr("dy", -5).attr("text-anchor", "middle")
                 .text(d => d.name.replace(" s.r.o.", "").replace(", s.r.o.", "").split(" ").slice(0, 2).join(" "));
 
@@ -481,6 +659,7 @@
         }
 
         render();
+        renderBubbles();
 
         // ============ DETAIL PANEL ============
         let currentDetailNode = null;
@@ -511,6 +690,17 @@
                 icoDiv.className = "detail-ico";
                 icoDiv.textContent = "IČO: " + d.ico;
                 header.appendChild(icoDiv);
+            }
+
+            if (d.dphStatus && dphLabels[d.dphStatus]) {
+                const dphDiv = document.createElement("div");
+                dphDiv.className = "dph-badge " + d.dphStatus;
+                const dot = document.createElement("span");
+                dot.className = "dph-dot";
+                dot.style.background = dphColors[d.dphStatus];
+                dphDiv.appendChild(dot);
+                dphDiv.appendChild(document.createTextNode(dphLabels[d.dphStatus]));
+                header.appendChild(dphDiv);
             }
 
             if (d.popis) {
@@ -685,6 +875,7 @@
             document.getElementById("modalShare").value = "100%";
             document.getElementById("modalSidlo").value = "";
             document.getElementById("modalPopis").value = "";
+            document.getElementById("modalDph").value = "";
             populateOwnerSelect(document.getElementById("modalOwner"), null);
             document.getElementById("companyModal").classList.add("open");
         }
@@ -697,6 +888,7 @@
             document.getElementById("modalType").value = d.type;
             document.getElementById("modalSidlo").value = d.sidlo || "";
             document.getElementById("modalPopis").value = d.popis || "";
+            document.getElementById("modalDph").value = d.dphStatus || "";
             populateOwnerSelect(document.getElementById("modalOwner"), d.id);
 
             const currentLink = links.find(l => l.target && l.target.id === d.id);
@@ -714,6 +906,7 @@
             const ico = document.getElementById("modalIco").value.trim();
             const sidlo = document.getElementById("modalSidlo").value.trim();
             const popis = document.getElementById("modalPopis").value.trim();
+            const dphStatus = document.getElementById("modalDph").value;
             const ownerId = document.getElementById("modalOwner").value;
             const share = document.getElementById("modalShare").value.trim() || "100%";
 
@@ -724,6 +917,7 @@
                 editingNode.ico = ico;
                 editingNode.sidlo = sidlo;
                 editingNode.popis = popis;
+                editingNode.dphStatus = dphStatus;
 
                 // Update link
                 const existingLinkIdx = links.findIndex(l => l.target && l.target.id === editingNode.id);
@@ -742,7 +936,7 @@
                 // Create new
                 const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 20) + '_' + Date.now();
                 const newNode = {
-                    id, name, type, ico, sidlo, popis,
+                    id, name, type, ico, sidlo, popis, dphStatus,
                     founded: "", kapital: "", cinnost: "", nickname: "",
                     x: centerX + (Math.random() - 0.5) * 300,
                     y: 400 + (Math.random() - 0.5) * 200
@@ -831,13 +1025,89 @@
             document.getElementById("detailPanel").classList.remove("open");
         }
 
+        // ============ BUBBLE MODAL ============
+        let editingBubble = null;
+        let selectedBubbleColor = "#6c5ce7";
+
+        function openBubbleModal(bubble = null) {
+            editingBubble = bubble;
+            const deleteBtn = document.getElementById("bubbleModalDelete");
+
+            if (bubble) {
+                document.getElementById("bubbleModalTitle").textContent = "Upravit bublinu";
+                document.getElementById("bubbleName").value = bubble.name;
+                selectedBubbleColor = bubble.color;
+                deleteBtn.style.display = "block";
+            } else {
+                document.getElementById("bubbleModalTitle").textContent = "Přidat bublinu";
+                document.getElementById("bubbleName").value = "";
+                selectedBubbleColor = "#6c5ce7";
+                deleteBtn.style.display = "none";
+            }
+
+            // Update color picker selection
+            document.querySelectorAll(".bubble-color-option").forEach(el => {
+                el.classList.toggle("selected", el.dataset.color === selectedBubbleColor);
+            });
+
+            document.getElementById("bubbleModal").classList.add("open");
+        }
+
+        function saveBubbleModal() {
+            const name = document.getElementById("bubbleName").value.trim();
+            if (!name) { alert("Název bubliny je povinný!"); return; }
+
+            if (editingBubble) {
+                editingBubble.name = name;
+                editingBubble.color = selectedBubbleColor;
+            } else {
+                const newBubble = {
+                    id: "bubble_" + Date.now(),
+                    name: name,
+                    color: selectedBubbleColor,
+                    x: centerX - 150 + (Math.random() - 0.5) * 200,
+                    y: 300 + (Math.random() - 0.5) * 100,
+                    width: 300,
+                    height: 200
+                };
+                bubbles.push(newBubble);
+            }
+
+            saveBubbles();
+            renderBubbles();
+            document.getElementById("bubbleModal").classList.remove("open");
+        }
+
+        function deleteBubbleModal() {
+            if (editingBubble && confirm("Smazat bublinu '" + editingBubble.name + "'?")) {
+                const idx = bubbles.findIndex(b => b.id === editingBubble.id);
+                if (idx >= 0) bubbles.splice(idx, 1);
+                saveBubbles();
+                renderBubbles();
+                document.getElementById("bubbleModal").classList.remove("open");
+            }
+        }
+
         // ============ EVENT LISTENERS ============
         document.getElementById("closeBtn").onclick = () => document.getElementById("detailPanel").classList.remove("open");
         document.getElementById("addCompanyBtn").onclick = openAddModal;
+        document.getElementById("addBubbleBtn").onclick = () => openBubbleModal(null);
         document.getElementById("modalCancel").onclick = () => document.getElementById("companyModal").classList.remove("open");
         document.getElementById("modalSave").onclick = saveModal;
         document.getElementById("ownerModalCancel").onclick = () => document.getElementById("ownerModal").classList.remove("open");
         document.getElementById("ownerModalSave").onclick = saveOwnerModal;
+        document.getElementById("bubbleModalCancel").onclick = () => document.getElementById("bubbleModal").classList.remove("open");
+        document.getElementById("bubbleModalSave").onclick = saveBubbleModal;
+        document.getElementById("bubbleModalDelete").onclick = deleteBubbleModal;
+
+        // Bubble color picker
+        document.querySelectorAll(".bubble-color-option").forEach(el => {
+            el.onclick = function() {
+                document.querySelectorAll(".bubble-color-option").forEach(e => e.classList.remove("selected"));
+                this.classList.add("selected");
+                selectedBubbleColor = this.dataset.color;
+            };
+        });
 
         document.getElementById("zoomInBtn").onclick = () => svg.transition().call(zoom.scaleBy, 1.3);
         document.getElementById("zoomOutBtn").onclick = () => svg.transition().call(zoom.scaleBy, 0.7);
@@ -849,11 +1119,57 @@
             }
         };
 
+        // Export data to JSON file
+        document.getElementById("exportBtn").onclick = function() {
+            const data = {
+                nodes: localStorage.getItem(STORAGE_KEY_NODES),
+                links: localStorage.getItem(STORAGE_KEY_LINKS),
+                positions: localStorage.getItem(STORAGE_KEY_POSITIONS),
+                nicknames: localStorage.getItem(STORAGE_KEY_NICKNAMES),
+                bubbles: localStorage.getItem(STORAGE_KEY_BUBBLES),
+                exportDate: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'zajicek-holding-backup.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        // Import data from JSON file
+        document.getElementById("importBtn").onclick = () => document.getElementById("importFile").click();
+        document.getElementById("importFile").onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.nodes) localStorage.setItem(STORAGE_KEY_NODES, data.nodes);
+                    if (data.links) localStorage.setItem(STORAGE_KEY_LINKS, data.links);
+                    if (data.positions) localStorage.setItem(STORAGE_KEY_POSITIONS, data.positions);
+                    if (data.nicknames) localStorage.setItem(STORAGE_KEY_NICKNAMES, data.nicknames);
+                    if (data.bubbles) localStorage.setItem(STORAGE_KEY_BUBBLES, data.bubbles);
+                    alert('Data úspěšně importována! Stránka se obnoví.');
+                    location.reload();
+                } catch (err) {
+                    alert('Chyba při importu: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = ''; // Reset input for re-import
+        };
+
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 document.getElementById("detailPanel").classList.remove("open");
                 document.getElementById("companyModal").classList.remove("open");
                 document.getElementById("ownerModal").classList.remove("open");
+                document.getElementById("bubbleModal").classList.remove("open");
             }
         });
 
@@ -863,6 +1179,9 @@
         };
         document.getElementById("ownerModal").onclick = (e) => {
             if (e.target.id === "ownerModal") document.getElementById("ownerModal").classList.remove("open");
+        };
+        document.getElementById("bubbleModal").onclick = (e) => {
+            if (e.target.id === "bubbleModal") document.getElementById("bubbleModal").classList.remove("open");
         };
     </script>
 </body>
