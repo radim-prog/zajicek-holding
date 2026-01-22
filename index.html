@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zajíček Holding - Struktura firem</title>
-    <!-- Deployed: 2026-01-22 - Bubble fix: circles -->
+    <!-- Deployed: 2026-01-22 -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -523,6 +523,10 @@
                 .attr("r", 8)
                 .attr("fill", d => d.color)
                 .call(d3.drag()
+                    .on("start", function(e) {
+                        // Zastavit propagaci aby rodičovský bubble drag nezachytil event
+                        e.sourceEvent.stopPropagation();
+                    })
                     .on("drag", function(e, d) {
                         const parent = d3.select(this.parentNode);
                         const minRadius = 50;
