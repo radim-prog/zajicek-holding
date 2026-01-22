@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zajíček Holding - Struktura firem</title>
-    <!-- Deployed: 2026-01-22 -->
+    <!-- Deployed: 2026-01-22 - Bubble fix: circles -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -100,10 +100,10 @@
 
         /* Bubble styles */
         .bubble { cursor: move; }
-        .bubble rect { rx: 15; ry: 15; stroke-width: 2; stroke-dasharray: 5,3; }
-        .bubble text { font-size: 14px; font-weight: 600; pointer-events: none; }
-        .bubble .resize-handle { cursor: nwse-resize; opacity: 0; transition: opacity 0.2s; }
-        .bubble:hover .resize-handle { opacity: 1; }
+        .bubble circle { stroke-width: 2; stroke-dasharray: 8,4; fill-opacity: 0.05; }
+        .bubble .bubble-label { font-size: 13px; font-weight: 600; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+        .bubble .resize-handle { cursor: ns-resize; opacity: 0; transition: opacity 0.2s; }
+        .bubble:hover .resize-handle { opacity: 0.8; }
         .bubble .delete-handle { cursor: pointer; opacity: 0; transition: opacity 0.2s; }
         .bubble:hover .delete-handle { opacity: 1; }
         .control-btn.bubble-btn { background: #6c5ce7; color: #fff; font-size: 14px; }
@@ -500,45 +500,48 @@
                     openBubbleModal(d);
                 });
 
-            // Background rect
-            bubble.append("rect")
-                .attr("width", d => d.width)
-                .attr("height", d => d.height)
-                .attr("fill", d => d.color.replace(")", ",0.15)").replace("rgb", "rgba"))
+            // Circle (radius stored in d.radius, default from old width/2)
+            bubble.append("circle")
+                .attr("r", d => d.radius || 100)
+                .attr("fill", d => d.color)
                 .attr("stroke", d => d.color);
 
-            // Label
+            // Label - pod kruhem vně
             bubble.append("text")
-                .attr("x", 15)
-                .attr("y", 22)
+                .attr("class", "bubble-label")
+                .attr("x", 0)
+                .attr("y", d => (d.radius || 100) + 20)
+                .attr("text-anchor", "middle")
                 .attr("fill", d => d.color)
                 .text(d => d.name);
 
-            // Resize handle (bottom-right corner)
-            bubble.append("rect")
+            // Resize handle - na spodní hraně kruhu (malé kolečko)
+            bubble.append("circle")
                 .attr("class", "resize-handle")
-                .attr("x", d => d.width - 20)
-                .attr("y", d => d.height - 20)
-                .attr("width", 20)
-                .attr("height", 20)
+                .attr("cx", 0)
+                .attr("cy", d => d.radius || 100)
+                .attr("r", 8)
                 .attr("fill", d => d.color)
-                .attr("rx", 5)
                 .call(d3.drag()
                     .on("drag", function(e, d) {
                         const parent = d3.select(this.parentNode);
-                        const minSize = 100;
-                        d.width = Math.max(minSize, e.x);
-                        d.height = Math.max(minSize, e.y);
-                        parent.select("rect:first-child").attr("width", d.width).attr("height", d.height);
-                        d3.select(this).attr("x", d.width - 20).attr("y", d.height - 20);
+                        const minRadius = 50;
+                        // Vzdálenost od středu = nový radius
+                        const dist = Math.sqrt(e.x * e.x + e.y * e.y);
+                        d.radius = Math.max(minRadius, dist);
+                        parent.select("circle:first-child").attr("r", d.radius);
+                        parent.select(".bubble-label").attr("y", d.radius + 20);
+                        d3.select(this).attr("cy", d.radius);
+                        parent.select(".delete-handle").attr("cy", -d.radius - 5);
                     })
                     .on("end", function() { saveBubbles(); }));
 
-            // Delete handle (top-right corner)
+            // Delete handle - nad kruhem
             bubble.append("text")
                 .attr("class", "delete-handle")
-                .attr("x", d => d.width - 20)
-                .attr("y", 20)
+                .attr("x", 0)
+                .attr("y", d => -(d.radius || 100) - 5)
+                .attr("text-anchor", "middle")
                 .attr("fill", "#ff6b6b")
                 .attr("font-size", "16px")
                 .attr("cursor", "pointer")
@@ -1066,10 +1069,9 @@
                     id: "bubble_" + Date.now(),
                     name: name,
                     color: selectedBubbleColor,
-                    x: centerX - 150 + (Math.random() - 0.5) * 200,
-                    y: 300 + (Math.random() - 0.5) * 100,
-                    width: 300,
-                    height: 200
+                    x: centerX + (Math.random() - 0.5) * 200,
+                    y: 350 + (Math.random() - 0.5) * 100,
+                    radius: 120
                 };
                 bubbles.push(newBubble);
             }
