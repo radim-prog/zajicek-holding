@@ -107,10 +107,6 @@
         .bubble:hover .delete-handle { opacity: 1; }
         .control-btn.bubble-btn { background: #6c5ce7; color: #fff; font-size: 14px; }
         .control-btn.bubble-btn:hover { background: #7d6df0; }
-        .control-btn.export-btn { background: #00b894; font-size: 14px; }
-        .control-btn.export-btn:hover { background: #00d4aa; }
-        .control-btn.import-btn { background: #fdcb6e; color: #0f0f23; font-size: 14px; }
-        .control-btn.import-btn:hover { background: #ffeaa7; }
 
         /* Bubble modal */
         .bubble-color-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
@@ -155,9 +151,6 @@
         <button class="control-btn" id="zoomOutBtn" title="Oddálit">⊖</button>
         <button class="control-btn" id="resetBtn" title="Reset zoomu">⟲</button>
         <button class="control-btn" id="resetPosBtn" title="Reset pozic" style="font-size: 12px;">↺</button>
-        <button class="control-btn export-btn" id="exportBtn" title="Export dat">⬇</button>
-        <button class="control-btn import-btn" id="importBtn" title="Import dat">⬆</button>
-        <input type="file" id="importFile" accept=".json" style="display: none;">
     </div>
     <div class="tooltip" id="tooltip"></div>
 
@@ -273,21 +266,21 @@
         // ============ DEFAULT DATA ============
         const defaultNodes = [
             { id: "radim", name: "Radim Zajíček", type: "person", ico: null, sidlo: "Lukavice 76", founded: null, kapital: null, cinnost: "Fyzická osoba - majitel", popis: "Zakladatel a majitel celé holdingové struktury", nickname: "", dphStatus: "" },
-            { id: "holding", name: "Zajíček Holding s.r.o.", type: "holding", ico: "23078375", sidlo: "Školská 660/3, Praha", founded: "18.3.2025", kapital: "20 000 Kč", cinnost: "Správa vlastního majetku", popis: "Hlavní mateřská společnost - drží podíly v ostatních firmách", nickname: "", dphStatus: "" },
-            { id: "zck", name: "ZCK s.r.o.", type: "standalone", ico: "25999168", sidlo: "Nové sady 988/2, Brno", founded: "8.11.2003", kapital: "200 000 Kč", cinnost: "Pronájem nemovitostí", popis: "Nejstarší firma - pronájem nemovitostí v Brně", nickname: "", dphStatus: "" },
-            { id: "market4auto", name: "Market4auto, s.r.o.", type: "standalone", ico: "21829381", sidlo: "Korunní 2569/108h, Praha", founded: "17.7.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive skupina - mateřská firma pro Car4Auto", nickname: "", dphStatus: "" },
-            { id: "consulting", name: "Zajíček Consulting s.r.o.", type: "subholding", ico: "07343957", sidlo: "Nové sady 988/2, Brno", founded: "3.8.2018", kapital: "1 Kč", cinnost: "Pronájem nemovitostí", popis: "Sub-holding pro servisní a automotive firmy", nickname: "", dphStatus: "" },
-            { id: "wikiporadce", name: "WikiPoradce.cz s.r.o.", type: "daughter", ico: "07835027", sidlo: "Bělehradská 858/23, Praha", founded: "24.1.2019", kapital: "10 000 Kč", cinnost: "Obchod a služby", popis: "Provozovatel webu wikiporadce.cz", nickname: "", dphStatus: "" },
-            { id: "arstono", name: "ARSTONO s.r.o.", type: "daughter", ico: "23673371", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "10 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - reality a poradenství", nickname: "", dphStatus: "" },
-            { id: "altro", name: "Altro Servis Group s.r.o.", type: "daughter", ico: "23673389", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - servisní služby", nickname: "", dphStatus: "" },
-            { id: "kaldaro", name: "Kaldaro s.r.o.", type: "daughter", ico: "23799137", sidlo: "Školská 660/3, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "", dphStatus: "" },
-            { id: "kortado", name: "Kortado group s.r.o.", type: "daughter", ico: "23799145", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "", dphStatus: "" },
-            { id: "ardono", name: "Ardono group s.r.o.", type: "daughter", ico: "23799153", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "", dphStatus: "" },
-            { id: "car4auto", name: "Car4Auto s.r.o.", type: "granddaughter", ico: "23673397", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Automotive - dcera Market4auto", nickname: "", dphStatus: "" },
-            { id: "carmakler", name: "CAR makléř, s.r.o.", type: "granddaughter", ico: "21957151", sidlo: "Školská 660/3, Praha", founded: "23.8.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive makléřství", nickname: "", dphStatus: "" },
-            { id: "novira", name: "Novira Servis Group s.r.o.", type: "granddaughter", ico: "24111929", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Servisní skupina - nová firma 2026", nickname: "", dphStatus: "" },
-            { id: "alvento", name: "Alvento Solutions s.r.o.", type: "granddaughter", ico: "24111953", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Solutions firma - nová firma 2026", nickname: "", dphStatus: "" },
-            { id: "carmakler_ins", name: "CAR makléř insurance s.r.o.", type: "external", ico: "", sidlo: "", founded: "", kapital: "", cinnost: "Pojištění", popis: "Vlastní manželka - plánované připojení pod CAR makléř", nickname: "", dphStatus: "" }
+            { id: "holding", name: "Zajíček Holding s.r.o.", type: "holding", ico: "23078375", sidlo: "Školská 660/3, Praha", founded: "18.3.2025", kapital: "20 000 Kč", cinnost: "Správa vlastního majetku", popis: "Hlavní mateřská společnost - drží podíly v ostatních firmách", nickname: "", dphStatus: "neplatce" },
+            { id: "zck", name: "ZCK s.r.o.", type: "standalone", ico: "25999168", sidlo: "Nové sady 988/2, Brno", founded: "8.11.2003", kapital: "200 000 Kč", cinnost: "Pronájem nemovitostí", popis: "Nejstarší firma - pronájem nemovitostí v Brně", nickname: "jde Pá", dphStatus: "platce" },
+            { id: "market4auto", name: "Market4auto, s.r.o.", type: "standalone", ico: "21829381", sidlo: "Korunní 2569/108h, Praha", founded: "17.7.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive skupina - mateřská firma pro Car4Auto", nickname: "Márty", dphStatus: "platce" },
+            { id: "consulting", name: "Zajíček Consulting s.r.o.", type: "subholding", ico: "07343957", sidlo: "Nové sady 988/2, Brno", founded: "3.8.2018", kapital: "1 Kč", cinnost: "Pronájem nemovitostí", popis: "Sub-holding pro servisní a automotive firmy", nickname: "", dphStatus: "platce" },
+            { id: "wikiporadce", name: "WikiPoradce.cz s.r.o.", type: "daughter", ico: "07835027", sidlo: "Bělehradská 858/23, Praha", founded: "24.1.2019", kapital: "10 000 Kč", cinnost: "Obchod a služby", popis: "Provozovatel webu wikiporadce.cz", nickname: "dostane J. Kubita", dphStatus: "platce" },
+            { id: "arstono", name: "ARSTONO s.r.o.", type: "daughter", ico: "23673371", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "10 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - reality a poradenství", nickname: "Hric", dphStatus: "proces" },
+            { id: "altro", name: "Altro Servis Group s.r.o.", type: "daughter", ico: "23673389", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - servisní služby", nickname: "Evžen", dphStatus: "neplatce" },
+            { id: "kaldaro", name: "Kaldaro s.r.o.", type: "daughter", ico: "23799137", sidlo: "Školská 660/3, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "volné (QS)", dphStatus: "" },
+            { id: "kortado", name: "Kortado group s.r.o.", type: "daughter", ico: "23799145", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "Hric kamos", dphStatus: "proces" },
+            { id: "ardono", name: "Ardono group s.r.o.", type: "daughter", ico: "23799153", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "volné", dphStatus: "neplatce" },
+            { id: "car4auto", name: "Car4Auto s.r.o.", type: "granddaughter", ico: "23673397", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Automotive - dcera Market4auto", nickname: "Márty II", dphStatus: "proces" },
+            { id: "carmakler", name: "CAR makléř, s.r.o.", type: "granddaughter", ico: "21957151", sidlo: "Školská 660/3, Praha", founded: "23.8.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive makléřství", nickname: "", dphStatus: "platce" },
+            { id: "novira", name: "Novira Servis Group s.r.o.", type: "granddaughter", ico: "24111929", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Servisní skupina - nová firma 2026", nickname: "Viktor II", dphStatus: "neplatce" },
+            { id: "alvento", name: "Alvento Solutions s.r.o.", type: "granddaughter", ico: "24111953", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Solutions firma - nová firma 2026", nickname: "Viktor", dphStatus: "neplatce" },
+            { id: "carmakler_ins", name: "CAR makléř insurance s.r.o.", type: "external", ico: "", sidlo: "", founded: "", kapital: "", cinnost: "Pojištění", popis: "Vlastní manželka - plánované připojení pod CAR makléř", nickname: "", dphStatus: "neplatce" }
         ];
 
         // DPH status colors and labels
@@ -312,22 +305,22 @@
         ];
 
         const defaultPositions = {
-            radim: { x: 960, y: 120 },
-            holding: { x: 960, y: 280 },
-            zck: { x: 610, y: 280 },
-            market4auto: { x: 1310, y: 280 },
-            consulting: { x: 760, y: 450 },
-            wikiporadce: { x: 1010, y: 450 },
-            arstono: { x: 1160, y: 450 },
-            altro: { x: 1310, y: 450 },
-            kaldaro: { x: 1460, y: 450 },
-            kortado: { x: 610, y: 530 },
-            ardono: { x: 460, y: 450 },
-            car4auto: { x: 1410, y: 450 },
-            carmakler: { x: 610, y: 620 },
-            novira: { x: 760, y: 620 },
-            alvento: { x: 910, y: 620 },
-            carmakler_ins: { x: 610, y: 750 }
+            radim: { x: 835, y: 120 },
+            holding: { x: 835, y: 280 },
+            zck: { x: 365, y: 11 },
+            market4auto: { x: 1021, y: -99 },
+            consulting: { x: 769, y: 499 },
+            wikiporadce: { x: 342, y: 166 },
+            arstono: { x: 1418, y: 100 },
+            altro: { x: 1151, y: 28 },
+            kaldaro: { x: 1238, y: 511 },
+            kortado: { x: 1412, y: 186 },
+            ardono: { x: 488, y: 372 },
+            car4auto: { x: 1083, y: -177 },
+            carmakler: { x: 816, y: 626 },
+            novira: { x: 475, y: 542 },
+            alvento: { x: 485, y: 461 },
+            carmakler_ins: { x: 856, y: 688 }
         };
 
         // ============ STORAGE ============
@@ -1117,51 +1110,6 @@
                 localStorage.removeItem(STORAGE_KEY_POSITIONS);
                 location.reload();
             }
-        };
-
-        // Export data to JSON file
-        document.getElementById("exportBtn").onclick = function() {
-            const data = {
-                nodes: localStorage.getItem(STORAGE_KEY_NODES),
-                links: localStorage.getItem(STORAGE_KEY_LINKS),
-                positions: localStorage.getItem(STORAGE_KEY_POSITIONS),
-                nicknames: localStorage.getItem(STORAGE_KEY_NICKNAMES),
-                bubbles: localStorage.getItem(STORAGE_KEY_BUBBLES),
-                exportDate: new Date().toISOString()
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'zajicek-holding-backup.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        };
-
-        // Import data from JSON file
-        document.getElementById("importBtn").onclick = () => document.getElementById("importFile").click();
-        document.getElementById("importFile").onchange = function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    if (data.nodes) localStorage.setItem(STORAGE_KEY_NODES, data.nodes);
-                    if (data.links) localStorage.setItem(STORAGE_KEY_LINKS, data.links);
-                    if (data.positions) localStorage.setItem(STORAGE_KEY_POSITIONS, data.positions);
-                    if (data.nicknames) localStorage.setItem(STORAGE_KEY_NICKNAMES, data.nicknames);
-                    if (data.bubbles) localStorage.setItem(STORAGE_KEY_BUBBLES, data.bubbles);
-                    alert('Data úspěšně importována! Stránka se obnoví.');
-                    location.reload();
-                } catch (err) {
-                    alert('Chyba při importu: ' + err.message);
-                }
-            };
-            reader.readAsText(file);
-            e.target.value = ''; // Reset input for re-import
         };
 
         document.addEventListener("keydown", (e) => {
