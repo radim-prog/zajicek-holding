@@ -1,54 +1,36 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="cs" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zajíček Holding - Vlastnická struktura</title>
-    <!-- Deployed: 2026-01-22 | Redesigned: 2026-03-05 -->
+    <title>Zajicek Holding - Vlastnicka struktura</title>
+    <!-- Rebuilt: 2026-03-05 | Label Card design -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        /* ============ LUXURY FINANCIAL ATLAS ============ */
+        /* ============ DESIGN SYSTEM ============ */
         :root {
-            --bg-deep: #1a1a2e;
-            --bg-surface: rgba(30, 30, 52, 0.90);
-            --bg-elevated: rgba(38, 38, 62, 0.94);
-            --bg-input: rgba(10, 10, 20, 0.35);
+            --bg-deep: #0F1117;
+            --bg-surface: #1A1D27;
+            --bg-elevated: #22252F;
+            --bg-input: rgba(255,255,255,0.06);
 
-            --copper: #c9956b;
-            --copper-bright: #e0b48a;
-            --copper-dim: #9e7352;
-            --copper-glow: rgba(201, 149, 107, 0.25);
-            --steel: #7eb8da;
-            --steel-dim: #5a8faa;
-            --ruby: #c45b52;
-            --ruby-light: #d4736b;
-            --emerald: #4a9b7f;
-            --emerald-light: #5fb896;
-            --royal: #5b6abf;
-            --royal-light: #7280d4;
-            --lavender: #8b7ec8;
-            --bronze: #b87333;
-            --bronze-light: #cc8844;
-            --amber: #d4a03c;
-            --amber-light: #e8bb5e;
-            --rose: #b85a6a;
-            --rose-light: #cc7080;
+            --accent: #6366F1;
+            --accent-light: #818CF8;
 
-            --text-warm: #e8e2d8;
-            --text-mid: #b0aca4;
-            --text-dim: #8a8698;
-            --text-faint: #5e5b6e;
-            --text-nick: #d4a03c;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-dim: #64748B;
+            --text-nick: #FBBF24;
 
-            --border: rgba(201, 149, 107, 0.12);
-            --border-strong: rgba(201, 149, 107, 0.25);
-            --glass-bg: rgba(30, 30, 52, 0.75);
-            --glass-border: rgba(201, 149, 107, 0.18);
-            --glass-blur: blur(24px);
-            --overlay: rgba(10, 10, 20, 0.75);
+            --border: rgba(255,255,255,0.08);
+            --border-strong: rgba(255,255,255,0.15);
+            --overlay: rgba(0,0,0,0.65);
+
+            --label-bg: #22252F;
+            --label-border: rgba(255,255,255,0.10);
 
             --radius-sm: 6px;
             --radius-md: 10px;
@@ -56,36 +38,37 @@
             --radius-xl: 24px;
 
             --ease-out: cubic-bezier(0.2, 0, 0, 1);
-            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-            --font-display: 'Playfair Display', Georgia, serif;
-            --font-body: 'DM Sans', -apple-system, sans-serif;
-            --font-mono: 'IBM Plex Mono', 'Menlo', monospace;
+            --font-body: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Menlo', monospace;
+
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
         }
 
         /* ============ LIGHT THEME ============ */
         [data-theme="light"] {
-            --bg-deep: #f4f1ec;
-            --bg-surface: rgba(255, 255, 255, 0.92);
-            --bg-elevated: rgba(255, 255, 255, 0.96);
-            --bg-input: rgba(0, 0, 0, 0.04);
+            --bg-deep: #F8F7F5;
+            --bg-surface: #FFFFFF;
+            --bg-elevated: #FFFFFF;
+            --bg-input: rgba(0,0,0,0.04);
 
-            --copper: #a07040;
-            --copper-bright: #c08850;
-            --copper-dim: #886030;
-            --copper-glow: rgba(160, 112, 64, 0.10);
+            --text-primary: #1A1A2E;
+            --text-secondary: #475569;
+            --text-dim: #64748B;
+            --text-nick: #B45309;
 
-            --text-warm: #1a1a2e;
-            --text-mid: #3d3a48;
-            --text-dim: #6b6878;
-            --text-faint: #9a97a8;
-            --text-nick: #9a7520;
+            --border: rgba(0,0,0,0.08);
+            --border-strong: rgba(0,0,0,0.15);
+            --overlay: rgba(0,0,0,0.35);
 
-            --border: rgba(0, 0, 0, 0.08);
-            --border-strong: rgba(0, 0, 0, 0.15);
-            --glass-bg: rgba(255, 255, 255, 0.80);
-            --glass-border: rgba(0, 0, 0, 0.08);
-            --overlay: rgba(0, 0, 0, 0.35);
+            --label-bg: #FFFFFF;
+            --label-border: rgba(0,0,0,0.10);
+
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
         }
 
         /* ============ RESET & BASE ============ */
@@ -95,43 +78,24 @@
             background: var(--bg-deep);
             min-height: 100vh;
             overflow: hidden;
-            color: var(--text-warm);
+            color: var(--text-primary);
         }
-
-        /* Noise texture overlay */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            opacity: 0.03;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 9999;
-        }
-        [data-theme="light"] body::before,
-        body[data-theme-host="light"]::before { opacity: 0.015; }
 
         /* ============ THEME TOGGLE ============ */
         .theme-toggle {
-            width: 38px; height: 38px;
+            width: 36px; height: 36px;
             border-radius: var(--radius-sm);
-            border: 1px solid var(--glass-border);
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            color: var(--text-mid);
+            border: 1px solid var(--border-strong);
+            background: var(--bg-surface);
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.25s var(--ease-out);
+            transition: all 0.2s var(--ease-out);
             display: flex; align-items: center; justify-content: center;
             margin-left: 16px;
             flex-shrink: 0;
         }
         .theme-toggle svg { width: 18px; height: 18px; }
-        .theme-toggle:hover {
-            background: var(--copper);
-            color: var(--bg-deep);
-            border-color: var(--copper);
-        }
+        .theme-toggle:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
         .theme-toggle .icon-sun { display: none; }
         .theme-toggle .icon-moon { display: block; }
         [data-theme="light"] .theme-toggle .icon-sun { display: block; }
@@ -140,126 +104,101 @@
         /* ============ HEADER ============ */
         .header {
             position: fixed; top: 0; left: 0; right: 0;
-            padding: 18px 32px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 32px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
             z-index: 100;
             display: flex; justify-content: space-between; align-items: center;
+            box-shadow: var(--shadow-sm);
         }
-        .header-brand {
-            display: flex; align-items: center; gap: 16px;
-        }
+        .header-brand { display: flex; align-items: center; gap: 14px; }
         .header-brand .logo-mark {
-            width: 36px; height: 36px;
-            border: 2px solid var(--copper);
+            width: 34px; height: 34px;
+            border: 2px solid var(--accent);
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-display);
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--copper);
+            font-family: var(--font-body);
+            font-size: 13px; font-weight: 700;
+            color: var(--accent);
             flex-shrink: 0;
         }
         .header h1 {
-            font-family: var(--font-display);
-            color: var(--text-warm);
-            font-size: 1.35em;
-            font-weight: 600;
-            letter-spacing: -0.01em;
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            font-size: 1.2em; font-weight: 700;
+            letter-spacing: -0.02em;
         }
-        .header h1 span {
-            color: var(--copper);
-        }
-        .header-stats { display: flex; gap: 32px; }
+        .header h1 span { color: var(--accent); }
+        .header-stats { display: flex; gap: 28px; }
         .stat { text-align: center; }
         .stat-value {
-            color: var(--copper);
+            color: var(--text-primary);
             font-family: var(--font-mono);
-            font-size: 1.6em;
-            font-weight: 600;
+            font-size: 1.4em; font-weight: 600;
             font-variant-numeric: tabular-nums;
         }
         .stat-label {
             color: var(--text-dim);
             font-family: var(--font-mono);
-            font-size: 0.65em;
+            font-size: 0.6em;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
         }
 
         /* ============ GRAPH ============ */
         #graph { width: 100vw; height: 100vh; }
 
         /* ============ LINKS ============ */
-        .link { fill: none; stroke-opacity: 0.5; }
-        .link-label {
-            font-size: 10px;
-            font-family: var(--font-mono);
-            font-weight: 500;
-            fill: var(--text-dim);
-            pointer-events: none;
-        }
+        .link { fill: none; stroke-opacity: 0.45; }
 
         /* ============ NODES ============ */
         .node { cursor: pointer; }
-        .node .node-ring {
-            fill: none;
-            stroke-width: 1.5;
-            stroke-opacity: 0.3;
-            stroke-dasharray: 3,3;
-        }
-        .node circle.node-core {
-            stroke-width: 2.5px;
-            transition: all 0.4s var(--ease-out);
-        }
+        .node circle.node-core { transition: filter 0.3s var(--ease-out); }
         .node:hover circle.node-core {
-            stroke-width: 3.5px;
+            filter: drop-shadow(0 0 8px var(--hover-color, rgba(99,102,241,0.5)));
         }
-        .node text {
-            font-size: 11.5px;
+        .node .label-card-bg {
+            rx: 6; ry: 6;
+        }
+        .node .label-name {
+            font-size: 12px;
             font-family: var(--font-body);
             font-weight: 600;
-            fill: var(--text-warm);
             pointer-events: none;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.5);
         }
-        [data-theme="light"] .node text {
-            text-shadow: 0 1px 3px rgba(255,255,255,0.8), 0 0 8px rgba(255,255,255,0.4);
-        }
-        .node .ico {
-            font-size: 9px;
-            font-family: var(--font-mono);
-            fill: var(--text-dim);
-            font-weight: 400;
-        }
-        .node .nickname {
+        .node .label-ico {
             font-size: 9.5px;
             font-family: var(--font-mono);
-            fill: var(--text-nick);
-            font-weight: 500;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+            font-weight: 400;
+            pointer-events: none;
         }
-        [data-theme="light"] .node .nickname {
-            text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+        .node .label-nick {
+            font-size: 9.5px;
+            font-family: var(--font-mono);
+            font-weight: 500;
+            pointer-events: none;
         }
         .nickname-input {
-            background: rgba(0,0,0,0.85);
-            border: 1.5px solid var(--amber);
+            background: var(--bg-elevated);
+            border: 1.5px solid var(--text-nick);
             border-radius: 4px;
-            color: var(--amber);
+            color: var(--text-nick);
             font-size: 10px;
             font-family: var(--font-mono);
             font-weight: 500;
             text-align: center;
             padding: 2px 5px;
             outline: none;
-            width: 80px;
+            width: 90px;
         }
-        [data-theme="light"] .nickname-input {
-            background: rgba(255,255,255,0.95);
-            color: #9a7520;
+
+        /* ============ LINK LABELS ============ */
+        .link-pill-bg { rx: 8; ry: 8; }
+        .link-pill-text {
+            font-size: 10px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            pointer-events: none;
         }
 
         /* ============ DETAIL PANEL ============ */
@@ -267,54 +206,41 @@
             position: fixed; right: -440px; top: 0;
             width: 420px; height: 100vh;
             background: var(--bg-elevated);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border-left: 1px solid var(--glass-border);
-            box-shadow: -8px 0 40px rgba(0,0,0,0.6);
+            border-left: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
             padding: 32px;
-            transition: right 0.45s var(--ease-out);
+            transition: right 0.4s var(--ease-out);
             z-index: 200;
             overflow-y: auto;
         }
         .detail-panel.open { right: 0; }
-        [data-theme="light"] .detail-panel { box-shadow: -8px 0 40px rgba(0,0,0,0.12); }
         .detail-panel::-webkit-scrollbar { width: 4px; }
         .detail-panel::-webkit-scrollbar-track { background: transparent; }
-        .detail-panel::-webkit-scrollbar-thumb {
-            background: var(--copper-dim);
-            border-radius: 2px;
-        }
-        .detail-panel::-webkit-scrollbar-thumb:hover { background: var(--copper); }
+        .detail-panel::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 2px; }
         .detail-close {
             position: absolute; top: 22px; right: 22px;
             background: none; border: none;
             color: var(--text-dim); font-size: 22px; cursor: pointer;
             transition: color 0.2s;
         }
-        .detail-close:hover { color: var(--copper); }
+        .detail-close:hover { color: var(--accent); }
         .detail-header {
-            margin-bottom: 24px;
-            padding-bottom: 20px;
+            margin-bottom: 24px; padding-bottom: 20px;
             border-bottom: 1px solid var(--border);
         }
         .detail-type {
             display: inline-block;
-            padding: 5px 14px;
-            border-radius: 4px;
+            padding: 5px 14px; border-radius: 4px;
             font-family: var(--font-mono);
-            font-size: 0.65em;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
+            font-size: 0.65em; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1.5px;
             margin-bottom: 14px;
         }
         .detail-name {
-            font-family: var(--font-display);
-            color: var(--text-warm);
-            font-size: 1.5em;
-            font-weight: 600;
-            margin-bottom: 6px;
-            line-height: 1.2;
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            font-size: 1.5em; font-weight: 700;
+            margin-bottom: 6px; line-height: 1.2;
         }
         .detail-ico {
             color: var(--text-dim);
@@ -322,61 +248,50 @@
             font-size: 0.85em;
         }
         .detail-popis {
-            color: var(--copper);
-            font-size: 0.9em;
-            margin-top: 12px;
+            color: var(--accent);
+            font-size: 0.9em; margin-top: 12px;
             padding: 14px;
-            background: var(--copper-glow);
+            background: rgba(99,102,241,0.08);
             border-radius: var(--radius-sm);
-            border-left: 3px solid var(--copper);
+            border-left: 3px solid var(--accent);
             line-height: 1.5;
         }
+        [data-theme="light"] .detail-popis { color: #4338CA; background: rgba(99,102,241,0.06); }
         .detail-section { margin-bottom: 22px; }
         .detail-section h3 {
-            color: var(--copper);
+            color: var(--accent);
             font-family: var(--font-mono);
-            font-size: 0.65em;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 12px;
+            font-size: 0.65em; text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 12px;
         }
+        [data-theme="light"] .detail-section h3 { color: #4338CA; }
         .detail-row {
             display: flex; justify-content: space-between;
             padding: 9px 0;
-            border-bottom: 1px solid rgba(201, 149, 107, 0.06);
+            border-bottom: 1px solid var(--border);
         }
-        .detail-row-label {
-            color: var(--text-dim);
-            font-size: 0.82em;
-        }
+        .detail-row-label { color: var(--text-dim); font-size: 0.82em; }
         .detail-row-value {
-            color: var(--text-warm);
-            font-size: 0.82em;
-            text-align: right;
-            max-width: 60%;
+            color: var(--text-primary); font-size: 0.82em;
+            text-align: right; max-width: 60%;
         }
         .ownership-chain {
-            background: var(--copper-glow);
+            background: rgba(99,102,241,0.06);
             border-radius: var(--radius-md);
-            padding: 16px;
-            margin-top: 10px;
+            padding: 16px; margin-top: 10px;
         }
         .ownership-item {
             display: flex; align-items: center;
             padding: 8px 0;
-            color: var(--text-warm);
-            font-size: 0.85em;
+            color: var(--text-primary); font-size: 0.85em;
         }
         .ownership-arrow {
-            color: var(--copper);
-            margin: 0 10px;
-            text-align: center;
-            font-family: var(--font-mono);
+            color: var(--accent); margin: 0 10px;
+            text-align: center; font-family: var(--font-mono);
         }
         .ownership-percent {
-            color: var(--copper);
-            font-family: var(--font-mono);
-            font-weight: 600;
+            color: var(--accent);
+            font-family: var(--font-mono); font-weight: 600;
             margin-left: auto;
         }
 
@@ -386,71 +301,60 @@
             padding: 8px 14px;
             border: 1px solid transparent;
             border-radius: var(--radius-sm);
-            font-size: 0.78em;
-            font-family: var(--font-body);
+            font-size: 0.78em; font-family: var(--font-body);
             cursor: pointer;
-            transition: all 0.25s var(--ease-out);
+            transition: all 0.2s var(--ease-out);
             display: inline-flex; align-items: center; gap: 6px;
         }
         .detail-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
         .detail-btn.edit {
-            background: rgba(91, 106, 191, 0.15);
-            color: var(--royal-light);
-            border-color: rgba(91, 106, 191, 0.3);
+            background: rgba(99,102,241,0.12); color: var(--accent-light);
+            border-color: rgba(99,102,241,0.25);
         }
-        .detail-btn.edit:hover { background: rgba(91, 106, 191, 0.25); }
+        .detail-btn.edit:hover { background: rgba(99,102,241,0.2); }
         .detail-btn.change-owner {
-            background: rgba(201, 149, 107, 0.15);
-            color: var(--copper-bright);
-            border-color: rgba(201, 149, 107, 0.3);
+            background: rgba(251,191,36,0.12); color: #FBBF24;
+            border-color: rgba(251,191,36,0.25);
         }
-        .detail-btn.change-owner:hover { background: rgba(201, 149, 107, 0.25); }
+        .detail-btn.change-owner:hover { background: rgba(251,191,36,0.2); }
         .detail-btn.disconnect {
-            background: rgba(184, 90, 106, 0.15);
-            color: var(--rose-light);
-            border-color: rgba(184, 90, 106, 0.3);
+            background: rgba(244,114,182,0.12); color: #F472B6;
+            border-color: rgba(244,114,182,0.25);
         }
-        .detail-btn.disconnect:hover { background: rgba(184, 90, 106, 0.25); }
+        .detail-btn.disconnect:hover { background: rgba(244,114,182,0.2); }
         .detail-btn.delete {
-            background: rgba(196, 91, 82, 0.15);
-            color: var(--ruby-light);
-            border-color: rgba(196, 91, 82, 0.3);
+            background: rgba(239,68,68,0.12); color: #EF4444;
+            border-color: rgba(239,68,68,0.25);
         }
-        .detail-btn.delete:hover { background: rgba(196, 91, 82, 0.25); }
+        .detail-btn.delete:hover { background: rgba(239,68,68,0.2); }
 
         /* ============ LEGEND ============ */
         .legend {
             position: fixed; bottom: 24px; left: 24px;
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
             padding: 16px 20px;
             border-radius: var(--radius-lg);
             z-index: 100;
             overflow: hidden;
             transition: max-height 0.4s var(--ease-out), padding 0.4s var(--ease-out);
             max-height: 500px;
+            box-shadow: var(--shadow-md);
         }
         .legend.collapsed { max-height: 38px; padding: 8px 20px; }
         .legend-header {
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 10px;
-            cursor: pointer;
-            user-select: none;
+            margin-bottom: 10px; cursor: pointer; user-select: none;
         }
         .legend.collapsed .legend-header { margin-bottom: 0; }
         .legend-title {
             color: var(--text-dim);
             font-family: var(--font-mono);
-            font-size: 0.6em;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            font-size: 0.6em; text-transform: uppercase; letter-spacing: 2px;
         }
         .legend-toggle {
             background: none; border: none;
-            color: var(--text-dim);
-            cursor: pointer; padding: 2px;
+            color: var(--text-dim); cursor: pointer; padding: 2px;
             transition: transform 0.3s var(--ease-out);
         }
         .legend.collapsed .legend-toggle { transform: rotate(180deg); }
@@ -459,14 +363,11 @@
         .legend-item {
             display: flex; align-items: center; gap: 10px;
             margin-bottom: 5px;
-            color: var(--text-mid);
-            font-size: 0.75em;
+            color: var(--text-secondary); font-size: 0.75em;
         }
         .legend-circle {
-            width: 12px; height: 12px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+            width: 10px; height: 10px;
+            border-radius: 50%; flex-shrink: 0;
         }
         .legend-dph {
             margin-top: 12px; padding-top: 10px;
@@ -475,14 +376,12 @@
         .legend-dph-item {
             display: flex; align-items: center; gap: 8px;
             margin-bottom: 4px;
-            color: var(--text-dim);
-            font-size: 0.7em;
+            color: var(--text-dim); font-size: 0.7em;
         }
         .legend-dph-dot {
-            width: 10px; height: 10px;
+            width: 8px; height: 8px;
             border-radius: 50%;
-            border: 2px solid var(--text-warm);
-            flex-shrink: 0;
+            border: 2px solid var(--text-primary); flex-shrink: 0;
         }
 
         /* ============ CONTROLS ============ */
@@ -493,81 +392,64 @@
         }
         .control-separator {
             width: 1px; height: 24px;
-            background: var(--border-strong);
-            margin: 0 4px;
+            background: var(--border-strong); margin: 0 4px;
         }
         .control-btn {
-            width: 38px; height: 38px;
+            width: 36px; height: 36px;
             border-radius: var(--radius-sm);
-            border: 1px solid var(--glass-border);
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            color: var(--text-mid);
+            border: 1px solid var(--border-strong);
+            background: var(--bg-surface);
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.25s var(--ease-out);
+            transition: all 0.2s var(--ease-out);
             display: flex; align-items: center; justify-content: center;
             position: relative;
+            box-shadow: var(--shadow-sm);
         }
         .control-btn svg { width: 16px; height: 16px; }
-        .control-btn:hover {
-            background: var(--copper);
-            color: var(--bg-deep);
-            border-color: var(--copper);
-        }
-        .control-btn:hover svg { stroke: var(--bg-deep); }
-        .control-btn.add-btn {
-            background: var(--copper);
-            color: var(--bg-deep);
-            border-color: var(--copper);
-        }
-        .control-btn.add-btn svg { stroke: var(--bg-deep); }
-        .control-btn.add-btn:hover { background: var(--copper-bright); border-color: var(--copper-bright); }
+        .control-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .control-btn:hover svg { stroke: #fff; }
+        .control-btn.add-btn { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .control-btn.add-btn svg { stroke: #fff; }
+        .control-btn.add-btn:hover { background: var(--accent-light); border-color: var(--accent-light); }
         .control-btn.bubble-btn {
-            background: rgba(91, 106, 191, 0.2);
-            color: var(--royal-light);
-            border-color: rgba(91, 106, 191, 0.3);
+            background: rgba(99,102,241,0.15); color: var(--accent-light);
+            border-color: rgba(99,102,241,0.3);
         }
-        .control-btn.bubble-btn svg { stroke: var(--royal-light); }
-        .control-btn.bubble-btn:hover { background: var(--royal); border-color: var(--royal); color: #fff; }
+        .control-btn.bubble-btn svg { stroke: var(--accent-light); }
+        .control-btn.bubble-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
         .control-btn.bubble-btn:hover svg { stroke: #fff; }
         .control-btn.export-btn {
-            background: rgba(74, 155, 127, 0.2);
-            color: var(--emerald-light);
-            border-color: rgba(74, 155, 127, 0.3);
+            background: rgba(16,185,129,0.15); color: #34D399;
+            border-color: rgba(16,185,129,0.3);
         }
-        .control-btn.export-btn svg { stroke: var(--emerald-light); }
-        .control-btn.export-btn:hover { background: var(--emerald); border-color: var(--emerald); color: #fff; }
+        .control-btn.export-btn svg { stroke: #34D399; }
+        .control-btn.export-btn:hover { background: #10B981; border-color: #10B981; color: #fff; }
         .control-btn.export-btn:hover svg { stroke: #fff; }
         .control-btn.import-btn {
-            background: rgba(212, 160, 60, 0.2);
-            color: var(--amber-light);
-            border-color: rgba(212, 160, 60, 0.3);
+            background: rgba(251,191,36,0.15); color: #FBBF24;
+            border-color: rgba(251,191,36,0.3);
         }
-        .control-btn.import-btn svg { stroke: var(--amber-light); }
-        .control-btn.import-btn:hover { background: var(--amber); border-color: var(--amber); color: var(--bg-deep); }
-        .control-btn.import-btn:hover svg { stroke: var(--bg-deep); }
+        .control-btn.import-btn svg { stroke: #FBBF24; }
+        .control-btn.import-btn:hover { background: #F59E0B; border-color: #F59E0B; color: #1A1A2E; }
+        .control-btn.import-btn:hover svg { stroke: #1A1A2E; }
 
         /* ============ CSS TOOLTIPS ============ */
         [data-tooltip] { position: relative; }
         [data-tooltip]::after {
             content: attr(data-tooltip);
             position: absolute;
-            bottom: calc(100% + 10px);
-            left: 50%;
+            bottom: calc(100% + 10px); left: 50%;
             transform: translateX(-50%);
             padding: 6px 12px;
             background: var(--bg-elevated);
-            border: 1px solid var(--glass-border);
-            color: var(--text-warm);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
             border-radius: var(--radius-sm);
-            font-family: var(--font-mono);
-            font-size: 10px;
-            white-space: nowrap;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
-            z-index: 500;
+            font-family: var(--font-mono); font-size: 10px;
+            white-space: nowrap; pointer-events: none;
+            opacity: 0; transition: opacity 0.2s; z-index: 500;
+            box-shadow: var(--shadow-md);
         }
         [data-tooltip]:hover::after { opacity: 1; }
 
@@ -576,88 +458,65 @@
             position: fixed;
             padding: 10px 16px;
             background: var(--bg-elevated);
-            border: 1px solid var(--glass-border);
-            color: var(--text-warm);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
             border-radius: var(--radius-sm);
-            font-size: 12px;
-            font-family: var(--font-body);
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
-            z-index: 300;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-        .tooltip .tooltip-ico {
-            color: var(--text-dim);
-            font-family: var(--font-mono);
-            font-size: 10px;
+            font-size: 12px; font-family: var(--font-body);
+            pointer-events: none; opacity: 0;
+            transition: opacity 0.2s; z-index: 300;
+            box-shadow: var(--shadow-md);
         }
         .tooltip.visible { opacity: 1; }
-        [data-theme="light"] .tooltip { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
 
         /* ============ MODAL STYLES ============ */
         .modal-overlay {
             position: fixed; inset: 0;
-            background: var(--overlay);
-            z-index: 400;
+            background: var(--overlay); z-index: 400;
             display: flex; align-items: center; justify-content: center;
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0.35s, opacity 0.35s;
+            visibility: hidden; opacity: 0;
+            transition: visibility 0.3s, opacity 0.3s;
         }
         .modal-overlay.open { visibility: visible; opacity: 1; }
-        .modal-overlay.open .modal {
-            animation: modalReveal 0.4s var(--ease-out);
-        }
+        .modal-overlay.open .modal { animation: modalReveal 0.35s var(--ease-out); }
         @keyframes modalReveal {
             from { opacity: 0; transform: translateY(24px) scale(0.96); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
         .modal {
             background: var(--bg-elevated);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--border);
             border-radius: var(--radius-xl);
             padding: 32px;
             width: 460px; max-width: 90vw; max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+            box-shadow: var(--shadow-lg);
         }
-        [data-theme="light"] .modal { box-shadow: 0 24px 64px rgba(0,0,0,0.12); }
         .modal::-webkit-scrollbar { width: 4px; }
         .modal::-webkit-scrollbar-track { background: transparent; }
-        .modal::-webkit-scrollbar-thumb { background: var(--copper-dim); border-radius: 2px; }
+        .modal::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 2px; }
         .modal h2 {
-            font-family: var(--font-display);
-            color: var(--text-warm);
-            margin-bottom: 24px;
-            font-size: 1.4em;
-            font-weight: 600;
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            margin-bottom: 24px; font-size: 1.4em; font-weight: 700;
         }
         .modal-field { margin-bottom: 16px; }
         .modal-field label {
-            display: block;
-            color: var(--text-dim);
+            display: block; color: var(--text-dim);
             font-family: var(--font-mono);
-            font-size: 0.7em;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 6px;
+            font-size: 0.7em; text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 6px;
         }
         .modal-field input, .modal-field select, .modal-field textarea {
             width: 100%; padding: 11px 14px;
             background: var(--bg-input);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            color: var(--text-warm);
-            font-size: 0.92em;
-            font-family: var(--font-body);
+            color: var(--text-primary);
+            font-size: 0.92em; font-family: var(--font-body);
             transition: border-color 0.2s;
         }
         .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus {
-            outline: none;
-            border-color: var(--copper);
+            outline: none; border-color: var(--accent);
         }
         .modal-field select { cursor: pointer; }
         .modal-field textarea { resize: vertical; min-height: 60px; }
@@ -666,46 +525,39 @@
             flex: 1; padding: 12px;
             border: 1px solid transparent;
             border-radius: var(--radius-sm);
-            font-size: 0.9em;
-            font-family: var(--font-body);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s var(--ease-out);
+            font-size: 0.9em; font-family: var(--font-body); font-weight: 600;
+            cursor: pointer; transition: all 0.2s var(--ease-out);
         }
-        .modal-btn.primary {
-            background: var(--copper);
-            color: var(--bg-deep);
-        }
-        .modal-btn.primary:hover { background: var(--copper-bright); }
+        .modal-btn.primary { background: var(--accent); color: #fff; }
+        .modal-btn.primary:hover { background: var(--accent-light); }
         .modal-btn.secondary {
-            background: transparent;
-            color: var(--text-mid);
+            background: transparent; color: var(--text-secondary);
             border-color: var(--border-strong);
         }
-        .modal-btn.secondary:hover { background: rgba(255,255,255,0.05); color: var(--text-warm); }
-        .modal-btn.danger { background: var(--ruby); color: var(--text-warm); }
-        .modal-btn.danger:hover { background: var(--ruby-light); }
+        .modal-btn.secondary:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+        .modal-btn.danger { background: #EF4444; color: #fff; }
+        .modal-btn.danger:hover { background: #F87171; }
 
         /* ============ DPH INDICATOR STYLES ============ */
-        .dph-indicator { stroke: var(--text-warm); stroke-width: 2px; }
+        .dph-indicator { stroke: var(--text-primary); stroke-width: 2px; }
         .dph-badge {
             display: inline-flex; align-items: center; gap: 6px;
-            padding: 5px 12px;
-            border-radius: 4px;
+            padding: 5px 12px; border-radius: 4px;
             font-family: var(--font-mono);
-            font-size: 0.65em;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            margin-top: 10px;
+            font-size: 0.65em; font-weight: 600;
+            letter-spacing: 0.5px; margin-top: 10px;
         }
-        .dph-badge.platce { background: rgba(74, 155, 127, 0.15); color: var(--emerald-light); }
-        .dph-badge.proces { background: rgba(212, 160, 60, 0.15); color: var(--amber-light); }
-        .dph-badge.neplatce { background: rgba(196, 91, 82, 0.15); color: var(--ruby-light); }
+        .dph-badge.platce { background: rgba(16,185,129,0.12); color: #34D399; }
+        .dph-badge.proces { background: rgba(251,191,36,0.12); color: #FBBF24; }
+        .dph-badge.neplatce { background: rgba(239,68,68,0.12); color: #EF4444; }
+        [data-theme="light"] .dph-badge.platce { color: #059669; }
+        [data-theme="light"] .dph-badge.proces { color: #D97706; }
+        [data-theme="light"] .dph-badge.neplatce { color: #DC2626; }
         .dph-dot { width: 7px; height: 7px; border-radius: 50%; }
 
         @keyframes dphPulse {
-            0%, 100% { opacity: 1; r: 7; }
-            50% { opacity: 0.4; r: 9; }
+            0%, 100% { opacity: 1; r: 6; }
+            50% { opacity: 0.4; r: 8; }
         }
         .dph-pulse { animation: dphPulse 2.5s ease-in-out infinite; }
 
@@ -713,15 +565,8 @@
         .bubble { cursor: move; }
         .bubble circle { stroke-width: 1.5; stroke-dasharray: 6,4; fill-opacity: 0.03; }
         .bubble .bubble-label {
-            font-size: 12px;
-            font-family: var(--font-mono);
-            font-weight: 600;
-            letter-spacing: 1px;
-            pointer-events: none;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-        }
-        [data-theme="light"] .bubble .bubble-label {
-            text-shadow: 0 1px 3px rgba(255,255,255,0.6);
+            font-size: 12px; font-family: var(--font-mono);
+            font-weight: 600; letter-spacing: 1px; pointer-events: none;
         }
         .bubble .resize-handle {
             cursor: ns-resize; opacity: 0.5;
@@ -736,67 +581,50 @@
         .bubble-color-option {
             width: 32px; height: 32px;
             border-radius: var(--radius-sm);
-            cursor: pointer;
-            border: 2px solid transparent;
+            cursor: pointer; border: 2px solid transparent;
             transition: all 0.2s;
         }
         .bubble-color-option:hover { transform: scale(1.1); }
-        .bubble-color-option.selected { border-color: var(--text-warm); }
+        .bubble-color-option.selected { border-color: var(--text-primary); }
 
         /* ============ CUSTOM DIALOG ============ */
         .dialog-overlay {
             position: fixed; inset: 0;
-            background: var(--overlay);
-            z-index: 600;
+            background: var(--overlay); z-index: 600;
             display: flex; align-items: center; justify-content: center;
             visibility: hidden; opacity: 0;
             transition: visibility 0.3s, opacity 0.3s;
         }
         .dialog-overlay.open { visibility: visible; opacity: 1; }
-        .dialog-overlay.open .dialog-box {
-            animation: modalReveal 0.35s var(--ease-out);
-        }
+        .dialog-overlay.open .dialog-box { animation: modalReveal 0.35s var(--ease-out); }
         .dialog-box {
             background: var(--bg-elevated);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--border);
             border-radius: var(--radius-xl);
-            padding: 32px;
-            width: 400px; max-width: 90vw;
+            padding: 32px; width: 400px; max-width: 90vw;
             text-align: center;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+            box-shadow: var(--shadow-lg);
         }
-        [data-theme="light"] .dialog-box { box-shadow: 0 24px 64px rgba(0,0,0,0.12); }
         .dialog-message {
             font-family: var(--font-body);
-            color: var(--text-warm);
-            font-size: 1em;
-            margin-bottom: 28px;
-            line-height: 1.6;
-            white-space: pre-line;
+            color: var(--text-primary);
+            font-size: 1em; margin-bottom: 28px;
+            line-height: 1.6; white-space: pre-line;
         }
         .dialog-buttons { display: flex; gap: 10px; }
         .dialog-btn {
             flex: 1; padding: 12px;
             border: 1px solid transparent;
             border-radius: var(--radius-sm);
-            font-size: 0.9em;
-            font-family: var(--font-body);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s var(--ease-out);
+            font-size: 0.9em; font-family: var(--font-body); font-weight: 600;
+            cursor: pointer; transition: all 0.2s var(--ease-out);
         }
-        .dialog-btn.dialog-confirm {
-            background: var(--copper);
-            color: var(--bg-deep);
-        }
-        .dialog-btn.dialog-confirm:hover { background: var(--copper-bright); }
-        .dialog-btn.dialog-confirm.danger { background: var(--ruby); color: var(--text-warm); }
-        .dialog-btn.dialog-confirm.danger:hover { background: var(--ruby-light); }
+        .dialog-btn.dialog-confirm { background: var(--accent); color: #fff; }
+        .dialog-btn.dialog-confirm:hover { background: var(--accent-light); }
+        .dialog-btn.dialog-confirm.danger { background: #EF4444; color: #fff; }
+        .dialog-btn.dialog-confirm.danger:hover { background: #F87171; }
         .dialog-btn.dialog-cancel {
-            background: transparent;
-            color: var(--text-mid);
+            background: transparent; color: var(--text-secondary);
             border-color: var(--border-strong);
         }
         .dialog-btn.dialog-cancel:hover { background: rgba(255,255,255,0.05); }
@@ -810,21 +638,19 @@
         .toast {
             padding: 14px 20px;
             background: var(--bg-elevated);
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--border);
             border-radius: var(--radius-md);
-            color: var(--text-warm);
-            font-size: 0.85em;
+            color: var(--text-primary); font-size: 0.85em;
             display: flex; align-items: center; gap: 10px;
             animation: toastIn 0.4s var(--ease-out), toastOut 0.4s var(--ease-out) 2.6s forwards;
             max-width: 340px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            box-shadow: var(--shadow-md);
         }
-        [data-theme="light"] .toast { box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
         .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
-        .toast.success { border-left: 3px solid var(--emerald); }
-        .toast.success svg { stroke: var(--emerald); }
-        .toast.error { border-left: 3px solid var(--ruby); }
-        .toast.error svg { stroke: var(--ruby); }
+        .toast.success { border-left: 3px solid #10B981; }
+        .toast.success svg { stroke: #10B981; }
+        .toast.error { border-left: 3px solid #EF4444; }
+        .toast.error svg { stroke: #EF4444; }
         @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
 
@@ -846,22 +672,22 @@
             from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .header { animation: fadeUp 0.6s var(--ease-out) 0.1s both; }
-        .legend { animation: fadeUp 0.6s var(--ease-out) 0.3s both; }
-        .controls { animation: fadeUp 0.6s var(--ease-out) 0.4s both; }
+        .header { animation: fadeUp 0.5s var(--ease-out) 0.1s both; }
+        .legend { animation: fadeUp 0.5s var(--ease-out) 0.3s both; }
+        .controls { animation: fadeUp 0.5s var(--ease-out) 0.4s both; }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-brand">
             <div class="logo-mark">ZH</div>
-            <h1><span>Zajíček</span> Holding</h1>
+            <h1><span>Zajicek</span> Holding</h1>
         </div>
         <div class="header-stats">
-            <div class="stat"><div class="stat-value" id="statCount">0</div><div class="stat-label">Aktivních firem</div></div>
-            <div class="stat"><div class="stat-value" id="statLevels">0</div><div class="stat-label">Úrovně</div></div>
+            <div class="stat"><div class="stat-value" id="statCount">0</div><div class="stat-label">Aktivnich firem</div></div>
+            <div class="stat"><div class="stat-value" id="statLevels">0</div><div class="stat-label">Urovne</div></div>
         </div>
-        <button class="theme-toggle" id="themeToggle" title="Přepnout světlý/tmavý režim">
+        <button class="theme-toggle" id="themeToggle" title="Prepnout svetly/tmavy rezim">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
@@ -879,33 +705,33 @@
             </button>
         </div>
         <div class="legend-content">
-            <div class="legend-item"><div class="legend-circle" style="background: #c9956b;"></div> Fyzická osoba</div>
-            <div class="legend-item"><div class="legend-circle" style="background: #c45b52;"></div> Hlavní holding</div>
-            <div class="legend-item"><div class="legend-circle" style="background: #d4a03c;"></div> Sub-holding</div>
-            <div class="legend-item"><div class="legend-circle" style="background: #5b6abf;"></div> Dceřiná firma</div>
-            <div class="legend-item"><div class="legend-circle" style="background: #8b7ec8;"></div> Vnukovská firma</div>
-            <div class="legend-item"><div class="legend-circle" style="background: #4a9b7f;"></div> Přímo vlastněná</div>
-            <div class="legend-item"><div class="legend-circle" style="background: #b87333;"></div> Externí (mimo strukturu)</div>
+            <div class="legend-item"><div class="legend-circle" style="background: #D4A853;"></div> Fyzicka osoba</div>
+            <div class="legend-item"><div class="legend-circle" style="background: #E05252;"></div> Hlavni holding</div>
+            <div class="legend-item"><div class="legend-circle" style="background: #E8993E;"></div> Sub-holding</div>
+            <div class="legend-item"><div class="legend-circle" style="background: #6366F1;"></div> Dcerina firma</div>
+            <div class="legend-item"><div class="legend-circle" style="background: #8B5CF6;"></div> Vnukovska firma</div>
+            <div class="legend-item"><div class="legend-circle" style="background: #10B981;"></div> Primo vlastnena</div>
+            <div class="legend-item"><div class="legend-circle" style="background: #B4722A;"></div> Externi (mimo strukturu)</div>
             <div class="legend-dph">
                 <div class="legend-title">DPH Status</div>
-                <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #4a9b7f;"></div> Plátce DPH</div>
-                <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #d4a03c;"></div> V procesu registrace</div>
-                <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #c45b52;"></div> Neplátce DPH</div>
+                <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #10B981;"></div> Platce DPH</div>
+                <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #F59E0B;"></div> V procesu registrace</div>
+                <div class="legend-dph-item"><div class="legend-dph-dot" style="background: #EF4444;"></div> Neplatce DPH</div>
             </div>
         </div>
     </div>
     <div class="controls">
-        <button class="control-btn add-btn" id="addCompanyBtn" data-tooltip="Přidat firmu">
+        <button class="control-btn add-btn" id="addCompanyBtn" data-tooltip="Pridat firmu">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
-        <button class="control-btn bubble-btn" id="addBubbleBtn" data-tooltip="Přidat bublinu">
+        <button class="control-btn bubble-btn" id="addBubbleBtn" data-tooltip="Pridat bublinu">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 2"><circle cx="12" cy="12" r="9"/></svg>
         </button>
         <div class="control-separator"></div>
-        <button class="control-btn" id="zoomInBtn" data-tooltip="Přiblížit">
+        <button class="control-btn" id="zoomInBtn" data-tooltip="Priblizit">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg>
         </button>
-        <button class="control-btn" id="zoomOutBtn" data-tooltip="Oddálit">
+        <button class="control-btn" id="zoomOutBtn" data-tooltip="Oddalit">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
         </button>
         <button class="control-btn" id="resetBtn" data-tooltip="Reset zoomu">
@@ -933,81 +759,81 @@
         </div>
     </div>
 
-    <!-- Modal pro přidání/editaci firmy -->
+    <!-- Modal pro pridani/editaci firmy -->
     <div class="modal-overlay" id="companyModal">
         <div class="modal">
-            <h2 id="modalTitle">Přidat firmu</h2>
+            <h2 id="modalTitle">Pridat firmu</h2>
             <div class="modal-field">
-                <label>Název firmy *</label>
-                <input type="text" id="modalName" placeholder="např. Nová firma s.r.o.">
+                <label>Nazev firmy *</label>
+                <input type="text" id="modalName" placeholder="napr. Nova firma s.r.o.">
             </div>
             <div class="modal-field">
-                <label>IČO</label>
-                <input type="text" id="modalIco" placeholder="např. 12345678">
+                <label>ICO</label>
+                <input type="text" id="modalIco" placeholder="napr. 12345678">
             </div>
             <div class="modal-field">
                 <label>Typ</label>
                 <select id="modalType">
-                    <option value="daughter">Dceřiná společnost</option>
-                    <option value="granddaughter">Vnukovská společnost</option>
+                    <option value="daughter">Dcerina spolecnost</option>
+                    <option value="granddaughter">Vnukovska spolecnost</option>
                     <option value="subholding">Sub-holding</option>
-                    <option value="standalone">Přímo vlastněná</option>
-                    <option value="external">Externí (mimo strukturu)</option>
-                    <option value="person">Fyzická osoba</option>
+                    <option value="standalone">Primo vlastnena</option>
+                    <option value="external">Externi (mimo strukturu)</option>
+                    <option value="person">Fyzicka osoba</option>
                 </select>
             </div>
             <div class="modal-field">
-                <label>Vlastník</label>
+                <label>Vlastnik</label>
                 <select id="modalOwner">
-                    <option value="">-- Bez vlastníka (nezávislá) --</option>
+                    <option value="">-- Bez vlastnika (nezavisla) --</option>
                 </select>
             </div>
             <div class="modal-field">
-                <label>Podíl</label>
+                <label>Podil</label>
                 <input type="text" id="modalShare" placeholder="100%" value="100%">
             </div>
             <div class="modal-field">
-                <label>Sídlo</label>
-                <input type="text" id="modalSidlo" placeholder="např. Školská 660/3, Praha">
+                <label>Sidlo</label>
+                <input type="text" id="modalSidlo" placeholder="napr. Skolska 660/3, Praha">
             </div>
             <div class="modal-field">
-                <label>Popis / Účel firmy</label>
-                <textarea id="modalPopis" placeholder="K čemu firma slouží..."></textarea>
+                <label>Popis / Ucel firmy</label>
+                <textarea id="modalPopis" placeholder="K cemu firma slouzi..."></textarea>
             </div>
             <div class="modal-field">
                 <label>DPH Status</label>
                 <select id="modalDph">
-                    <option value="">-- Nezadáno --</option>
-                    <option value="platce">Plátce DPH</option>
+                    <option value="">-- Nezadano --</option>
+                    <option value="platce">Platce DPH</option>
                     <option value="proces">V procesu registrace</option>
-                    <option value="neplatce">Neplátce DPH</option>
+                    <option value="neplatce">Neplatce DPH</option>
                 </select>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn secondary" id="modalCancel">Zrušit</button>
-                <button class="modal-btn primary" id="modalSave">Uložit</button>
+                <button class="modal-btn secondary" id="modalCancel">Zrusit</button>
+                <button class="modal-btn primary" id="modalSave">Ulozit</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal pro změnu vlastníka -->
+    <!-- Modal pro zmenu vlastnika -->
     <div class="modal-overlay" id="ownerModal">
         <div class="modal">
-            <h2>Změnit vlastníka</h2>
+            <h2>Zmenit vlastnika</h2>
             <p style="color: var(--text-dim); margin-bottom: 20px;" id="ownerModalInfo"></p>
             <div class="modal-field">
-                <label>Nový vlastník</label>
+                <label>Novy vlastnik</label>
                 <select id="ownerModalSelect">
-                    <option value="">-- Bez vlastníka (odpojit) --</option>
+                    <option value="">-- Bez vlastnika (odpojit) --</option>
                 </select>
             </div>
             <div class="modal-field">
-                <label>Podíl</label>
+                <label>Podil</label>
                 <input type="text" id="ownerModalShare" placeholder="100%" value="100%">
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn secondary" id="ownerModalCancel">Zrušit</button>
-                <button class="modal-btn primary" id="ownerModalSave">Uložit</button>
+                <button class="modal-btn secondary" id="ownerModalCancel">Zrusit</button>
+                <button class="modal-btn primary" id="ownerModalSave">Ulozit</button>
             </div>
         </div>
     </div>
@@ -1015,28 +841,28 @@
     <!-- Modal pro bublinu -->
     <div class="modal-overlay" id="bubbleModal">
         <div class="modal">
-            <h2 id="bubbleModalTitle">Přidat bublinu</h2>
+            <h2 id="bubbleModalTitle">Pridat bublinu</h2>
             <div class="modal-field">
-                <label>Název bubliny *</label>
-                <input type="text" id="bubbleName" placeholder="např. Projekt Alfa">
+                <label>Nazev bubliny *</label>
+                <input type="text" id="bubbleName" placeholder="napr. Projekt Alfa">
             </div>
             <div class="modal-field">
                 <label>Barva</label>
                 <div class="bubble-color-picker" id="bubbleColorPicker">
-                    <div class="bubble-color-option selected" data-color="#5b6abf" style="background: rgba(91,106,191,0.3); border-color: #5b6abf;"></div>
-                    <div class="bubble-color-option" data-color="#c9956b" style="background: rgba(201,149,107,0.3); border-color: #c9956b;"></div>
-                    <div class="bubble-color-option" data-color="#d4a03c" style="background: rgba(212,160,60,0.3); border-color: #d4a03c;"></div>
-                    <div class="bubble-color-option" data-color="#c45b52" style="background: rgba(196,91,82,0.3); border-color: #c45b52;"></div>
-                    <div class="bubble-color-option" data-color="#7eb8da" style="background: rgba(126,184,218,0.3); border-color: #7eb8da;"></div>
-                    <div class="bubble-color-option" data-color="#b85a6a" style="background: rgba(184,90,106,0.3); border-color: #b85a6a;"></div>
-                    <div class="bubble-color-option" data-color="#8b7ec8" style="background: rgba(139,126,200,0.3); border-color: #8b7ec8;"></div>
-                    <div class="bubble-color-option" data-color="#4a9b7f" style="background: rgba(74,155,127,0.3); border-color: #4a9b7f;"></div>
+                    <div class="bubble-color-option selected" data-color="#6366F1" style="background: rgba(99,102,241,0.3); border-color: #6366F1;"></div>
+                    <div class="bubble-color-option" data-color="#D4A853" style="background: rgba(212,168,83,0.3); border-color: #D4A853;"></div>
+                    <div class="bubble-color-option" data-color="#E8993E" style="background: rgba(232,153,62,0.3); border-color: #E8993E;"></div>
+                    <div class="bubble-color-option" data-color="#E05252" style="background: rgba(224,82,82,0.3); border-color: #E05252;"></div>
+                    <div class="bubble-color-option" data-color="#06B6D4" style="background: rgba(6,182,212,0.3); border-color: #06B6D4;"></div>
+                    <div class="bubble-color-option" data-color="#F472B6" style="background: rgba(244,114,182,0.3); border-color: #F472B6;"></div>
+                    <div class="bubble-color-option" data-color="#8B5CF6" style="background: rgba(139,92,246,0.3); border-color: #8B5CF6;"></div>
+                    <div class="bubble-color-option" data-color="#10B981" style="background: rgba(16,185,129,0.3); border-color: #10B981;"></div>
                 </div>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn secondary" id="bubbleModalCancel">Zrušit</button>
+                <button class="modal-btn secondary" id="bubbleModalCancel">Zrusit</button>
                 <button class="modal-btn danger" id="bubbleModalDelete" style="display: none;">Smazat</button>
-                <button class="modal-btn primary" id="bubbleModalSave">Uložit</button>
+                <button class="modal-btn primary" id="bubbleModalSave">Ulozit</button>
             </div>
         </div>
     </div>
@@ -1058,19 +884,8 @@
             var next = current === 'light' ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', next);
             localStorage.setItem(STORAGE_KEY_THEME, next);
-            updateThemeSvgColors();
-        }
-
-        function updateThemeSvgColors() {
-            // Update arrowhead
-            var arrow = document.querySelector('#arrowhead path');
-            if (arrow) arrow.setAttribute('fill', getThemeColor('#8a8698', '#9a97a8'));
-            // Update grid dots
-            var gridDot = document.querySelector('#gridPattern circle');
-            if (gridDot) gridDot.setAttribute('fill', getThemeColor('rgba(201,149,107,0.06)', 'rgba(160,112,64,0.05)'));
-            // Re-render links & nodes with correct colors
-            if (typeof render === 'function') render();
-            if (typeof renderBubbles === 'function') renderBubbles();
+            render();
+            renderBubbles();
         }
 
         // ============ SVG ICON HELPERS ============
@@ -1126,7 +941,7 @@
                 } else {
                     var cancelBtn = document.createElement('button');
                     cancelBtn.className = 'dialog-btn dialog-cancel';
-                    cancelBtn.textContent = options.cancelText || 'Zrušit';
+                    cancelBtn.textContent = options.cancelText || 'Zrusit';
                     cancelBtn.onclick = function() { overlay.classList.remove('open'); resolve(false); };
                     btnsEl.appendChild(cancelBtn);
                     var confirmBtn = document.createElement('button');
@@ -1141,26 +956,26 @@
 
         // ============ DEFAULT DATA ============
         var defaultNodes = [
-            { id: "radim", name: "Radim Zajíček", type: "person", ico: null, sidlo: "Lukavice 76", founded: null, kapital: null, cinnost: "Fyzická osoba - majitel", popis: "Zakladatel a majitel celé holdingové struktury", nickname: "", dphStatus: "" },
-            { id: "holding", name: "Zajíček Holding s.r.o.", type: "holding", ico: "23078375", sidlo: "Školská 660/3, Praha", founded: "18.3.2025", kapital: "20 000 Kč", cinnost: "Správa vlastního majetku", popis: "Hlavní mateřská společnost - drží podíly v ostatních firmách", nickname: "", dphStatus: "neplatce" },
-            { id: "zck", name: "ZCK s.r.o.", type: "standalone", ico: "25999168", sidlo: "Nové sady 988/2, Brno", founded: "8.11.2003", kapital: "200 000 Kč", cinnost: "Pronájem nemovitostí", popis: "Nejstarší firma - pronájem nemovitostí v Brně", nickname: "jde Pá", dphStatus: "platce" },
-            { id: "market4auto", name: "Market4auto, s.r.o.", type: "standalone", ico: "21829381", sidlo: "Korunní 2569/108h, Praha", founded: "17.7.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive skupina - mateřská firma pro Car4Auto", nickname: "Márty", dphStatus: "platce" },
-            { id: "consulting", name: "Zajíček Consulting s.r.o.", type: "subholding", ico: "07343957", sidlo: "Nové sady 988/2, Brno", founded: "3.8.2018", kapital: "1 Kč", cinnost: "Pronájem nemovitostí", popis: "Sub-holding pro servisní a automotive firmy", nickname: "", dphStatus: "platce" },
-            { id: "wikiporadce", name: "WikiPoradce.cz s.r.o.", type: "daughter", ico: "07835027", sidlo: "Bělehradská 858/23, Praha", founded: "24.1.2019", kapital: "10 000 Kč", cinnost: "Obchod a služby", popis: "Provozovatel webu wikiporadce.cz", nickname: "dostane J. Kubita", dphStatus: "platce" },
-            { id: "arstono", name: "ARSTONO s.r.o.", type: "daughter", ico: "23673371", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "10 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - reality a poradenství", nickname: "Hric", dphStatus: "proces" },
-            { id: "altro", name: "Altro Servis Group s.r.o.", type: "daughter", ico: "23673389", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Projektová firma - servisní služby", nickname: "Evžen", dphStatus: "neplatce" },
-            { id: "kaldaro", name: "Kaldaro s.r.o.", type: "daughter", ico: "23799137", sidlo: "Školská 660/3, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "volné (QS)", dphStatus: "" },
-            { id: "kortado", name: "Kortado group s.r.o.", type: "daughter", ico: "23799145", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "Hric kamoš", dphStatus: "proces" },
-            { id: "ardono", name: "Ardono group s.r.o.", type: "daughter", ico: "23799153", sidlo: "Uralská 689/7, Praha", founded: "2.10.2025", kapital: "10 000 Kč", cinnost: "Zemědělství, obchod", popis: "Projektová firma - zemědělství", nickname: "volné", dphStatus: "neplatce" },
-            { id: "car4auto", name: "Car4Auto s.r.o.", type: "granddaughter", ico: "23673397", sidlo: "Školská 660/3, Praha", founded: "2.9.2025", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Automotive - dcera Market4auto", nickname: "Márty II", dphStatus: "proces" },
-            { id: "carmakler", name: "CAR makléř, s.r.o.", type: "granddaughter", ico: "21957151", sidlo: "Školská 660/3, Praha", founded: "23.8.2024", kapital: "1 000 Kč", cinnost: "Obchod a služby", popis: "Automotive makléřství", nickname: "", dphStatus: "platce" },
-            { id: "novira", name: "Novira Servis Group s.r.o.", type: "granddaughter", ico: "24111929", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, poradenství", popis: "Servisní skupina - nová firma 2026", nickname: "Viktor II", dphStatus: "neplatce" },
-            { id: "alvento", name: "Alvento Solutions s.r.o.", type: "granddaughter", ico: "24111953", sidlo: "Školská 660/3, Praha", founded: "1.1.2026", kapital: "20 000 Kč", cinnost: "Reality, obchod", popis: "Solutions firma - nová firma 2026", nickname: "Viktor", dphStatus: "neplatce" },
-            { id: "carmakler_ins", name: "CAR makléř insurance s.r.o.", type: "external", ico: "", sidlo: "", founded: "", kapital: "", cinnost: "Pojištění", popis: "Vlastní manželka - plánované připojení pod CAR makléř", nickname: "", dphStatus: "neplatce" }
+            { id: "radim", name: "Radim Zaj\u00ed\u010dek", type: "person", ico: null, sidlo: "Lukavice 76", founded: null, kapital: null, cinnost: "Fyzick\u00e1 osoba - majitel", popis: "Zakladatel a majitel cel\u00e9 holdingov\u00e9 struktury", nickname: "", dphStatus: "" },
+            { id: "holding", name: "Zaj\u00ed\u010dek Holding s.r.o.", type: "holding", ico: "23078375", sidlo: "\u0160kolsk\u00e1 660/3, Praha", founded: "18.3.2025", kapital: "20 000 K\u010d", cinnost: "Spr\u00e1va vlastn\u00edho majetku", popis: "Hlavn\u00ed mate\u0159sk\u00e1 spole\u010dnost - dr\u017e\u00ed pod\u00edly v ostatn\u00edch firm\u00e1ch", nickname: "", dphStatus: "neplatce" },
+            { id: "zck", name: "ZCK s.r.o.", type: "standalone", ico: "25999168", sidlo: "Nov\u00e9 sady 988/2, Brno", founded: "8.11.2003", kapital: "200 000 K\u010d", cinnost: "Pron\u00e1jem nemovitost\u00ed", popis: "Nejstar\u0161\u00ed firma - pron\u00e1jem nemovitost\u00ed v Brn\u011b", nickname: "jde P\u00e1", dphStatus: "platce" },
+            { id: "market4auto", name: "Market4auto, s.r.o.", type: "standalone", ico: "21829381", sidlo: "Korunn\u00ed 2569/108h, Praha", founded: "17.7.2024", kapital: "1 000 K\u010d", cinnost: "Obchod a slu\u017eby", popis: "Automotive skupina - mate\u0159sk\u00e1 firma pro Car4Auto", nickname: "M\u00e1rty", dphStatus: "platce" },
+            { id: "consulting", name: "Zaj\u00ed\u010dek Consulting s.r.o.", type: "subholding", ico: "07343957", sidlo: "Nov\u00e9 sady 988/2, Brno", founded: "3.8.2018", kapital: "1 K\u010d", cinnost: "Pron\u00e1jem nemovitost\u00ed", popis: "Sub-holding pro servisn\u00ed a automotive firmy", nickname: "", dphStatus: "platce" },
+            { id: "wikiporadce", name: "WikiPoradce.cz s.r.o.", type: "daughter", ico: "07835027", sidlo: "B\u011blehradsk\u00e1 858/23, Praha", founded: "24.1.2019", kapital: "10 000 K\u010d", cinnost: "Obchod a slu\u017eby", popis: "Provozovatel webu wikiporadce.cz", nickname: "dostane J. Kubita", dphStatus: "platce" },
+            { id: "arstono", name: "ARSTONO s.r.o.", type: "daughter", ico: "23673371", sidlo: "\u0160kolsk\u00e1 660/3, Praha", founded: "2.9.2025", kapital: "10 000 K\u010d", cinnost: "Reality, poradenstv\u00ed", popis: "Projektov\u00e1 firma - reality a poradenstv\u00ed", nickname: "Hric", dphStatus: "proces" },
+            { id: "altro", name: "Altro Servis Group s.r.o.", type: "daughter", ico: "23673389", sidlo: "\u0160kolsk\u00e1 660/3, Praha", founded: "2.9.2025", kapital: "20 000 K\u010d", cinnost: "Reality, poradenstv\u00ed", popis: "Projektov\u00e1 firma - servisn\u00ed slu\u017eby", nickname: "Ev\u017een", dphStatus: "neplatce" },
+            { id: "kaldaro", name: "Kaldaro s.r.o.", type: "daughter", ico: "23799137", sidlo: "\u0160kolsk\u00e1 660/3, Praha", founded: "2.10.2025", kapital: "10 000 K\u010d", cinnost: "Zem\u011bd\u011blstv\u00ed, obchod", popis: "Projektov\u00e1 firma - zem\u011bd\u011blstv\u00ed", nickname: "voln\u00e9 (QS)", dphStatus: "" },
+            { id: "kortado", name: "Kortado group s.r.o.", type: "daughter", ico: "23799145", sidlo: "Uralsk\u00e1 689/7, Praha", founded: "2.10.2025", kapital: "10 000 K\u010d", cinnost: "Zem\u011bd\u011blstv\u00ed, obchod", popis: "Projektov\u00e1 firma - zem\u011bd\u011blstv\u00ed", nickname: "Hric kamo\u0161", dphStatus: "proces" },
+            { id: "ardono", name: "Ardono group s.r.o.", type: "daughter", ico: "23799153", sidlo: "Uralsk\u00e1 689/7, Praha", founded: "2.10.2025", kapital: "10 000 K\u010d", cinnost: "Zem\u011bd\u011blstv\u00ed, obchod", popis: "Projektov\u00e1 firma - zem\u011bd\u011blstv\u00ed", nickname: "voln\u00e9", dphStatus: "neplatce" },
+            { id: "car4auto", name: "Car4Auto s.r.o.", type: "granddaughter", ico: "23673397", sidlo: "\u0160kolsk\u00e1 660/3, Praha", founded: "2.9.2025", kapital: "20 000 K\u010d", cinnost: "Reality, obchod", popis: "Automotive - dcera Market4auto", nickname: "M\u00e1rty II", dphStatus: "proces" },
+            { id: "carmakler", name: "CAR makl\u00e9\u0159, s.r.o.", type: "granddaughter", ico: "21957151", sidlo: "\u0160kolsk\u00e1 660/3, Praha", founded: "23.8.2024", kapital: "1 000 K\u010d", cinnost: "Obchod a slu\u017eby", popis: "Automotive makl\u00e9\u0159stv\u00ed", nickname: "", dphStatus: "platce" },
+            { id: "novira", name: "Novira Servis Group s.r.o.", type: "granddaughter", ico: "24111929", sidlo: "\u0160kolsk\u00e1 660/3, Praha", founded: "1.1.2026", kapital: "20 000 K\u010d", cinnost: "Reality, poradenstv\u00ed", popis: "Servisn\u00ed skupina - nov\u00e1 firma 2026", nickname: "Viktor II", dphStatus: "neplatce" },
+            { id: "alvento", name: "Alvento Solutions s.r.o.", type: "granddaughter", ico: "24111953", sidlo: "\u0160kolsk\u00e1 660/3, Praha", founded: "1.1.2026", kapital: "20 000 K\u010d", cinnost: "Reality, obchod", popis: "Solutions firma - nov\u00e1 firma 2026", nickname: "Viktor", dphStatus: "neplatce" },
+            { id: "carmakler_ins", name: "CAR makl\u00e9\u0159 insurance s.r.o.", type: "external", ico: "", sidlo: "", founded: "", kapital: "", cinnost: "Poji\u0161t\u011bn\u00ed", popis: "Vlastn\u00ed man\u017eelka - pl\u00e1novan\u00e9 p\u0159ipojen\u00ed pod CAR makl\u00e9\u0159", nickname: "", dphStatus: "neplatce" }
         ];
 
-        var dphColors = { platce: "#4a9b7f", proces: "#d4a03c", neplatce: "#c45b52" };
-        var dphLabels = { platce: "Plátce DPH", proces: "V procesu registrace", neplatce: "Neplátce DPH" };
+        var dphColors = { platce: "#10B981", proces: "#F59E0B", neplatce: "#EF4444" };
+        var dphLabels = { platce: "Pl\u00e1tce DPH", proces: "V procesu registrace", neplatce: "Nepl\u00e1tce DPH" };
 
         var defaultLinks = [
             { source: "radim", target: "holding", share: "100%" },
@@ -1233,10 +1048,10 @@
         var links = data.links;
         var bubbles = loadBubbles();
 
-        // New luxury color palette
-        var colors = { person: "#c9956b", holding: "#c45b52", subholding: "#d4a03c", daughter: "#5b6abf", granddaughter: "#8b7ec8", standalone: "#4a9b7f", external: "#b87333" };
-        var sizes = { person: 45, holding: 40, subholding: 35, daughter: 28, granddaughter: 24, standalone: 30, external: 25 };
-        var typeLabels = { person: "Fyzická osoba", holding: "Hlavní holding", subholding: "Sub-holding", daughter: "Dceřiná společnost", granddaughter: "Vnukovská společnost", standalone: "Přímo vlastněná", external: "Externí" };
+        // New clean color palette
+        var colors = { person: "#D4A853", holding: "#E05252", subholding: "#E8993E", daughter: "#6366F1", granddaughter: "#8B5CF6", standalone: "#10B981", external: "#B4722A" };
+        var sizes = { person: 22, holding: 20, subholding: 18, daughter: 14, granddaughter: 12, standalone: 16, external: 12 };
+        var typeLabels = { person: "Fyzick\u00e1 osoba", holding: "Hlavn\u00ed holding", subholding: "Sub-holding", daughter: "Dce\u0159in\u00e1 spole\u010dnost", granddaughter: "Vnukovsk\u00e1 spole\u010dnost", standalone: "P\u0159\u00edmo vlastn\u011bn\u00e1", external: "Extern\u00ed" };
 
         var width = window.innerWidth, height = window.innerHeight;
         var centerX = width / 2;
@@ -1274,31 +1089,11 @@
 
         var defs = svg.append("defs");
 
-        // Arrowhead - copper colored
-        defs.append("marker").attr("id", "arrowhead").attr("viewBox", "-0 -5 10 10")
-            .attr("refX", 20).attr("refY", 0).attr("orient", "auto")
-            .attr("markerWidth", 7).attr("markerHeight", 7)
-            .append("path").attr("d", "M 0,-4 L 8,0 L 0,4").attr("fill", getThemeColor("#8a8698", "#9a97a8"));
-
-        // Glow filter
-        var glowFilter = defs.append("filter").attr("id", "glow").attr("x", "-50%").attr("y", "-50%").attr("width", "200%").attr("height", "200%");
-        glowFilter.append("feGaussianBlur").attr("stdDeviation", "6").attr("result", "blur");
-        var gm = glowFilter.append("feMerge");
-        gm.append("feMergeNode").attr("in", "blur");
-        gm.append("feMergeNode").attr("in", "SourceGraphic");
-
-        // Radial gradients for each node type
-        Object.keys(colors).forEach(function(type) {
-            var grad = defs.append("radialGradient").attr("id", "grad-" + type).attr("cx", "35%").attr("cy", "35%");
-            grad.append("stop").attr("offset", "0%").attr("stop-color", d3.color(colors[type]).brighter(0.8));
-            grad.append("stop").attr("offset", "100%").attr("stop-color", d3.color(colors[type]).darker(0.3));
-        });
-
-        // Background: subtle cross-hatch grid
-        var gridPattern = defs.append("pattern").attr("id", "gridPattern").attr("width", 40).attr("height", 40).attr("patternUnits", "userSpaceOnUse");
-        gridPattern.append("circle").attr("cx", 20).attr("cy", 20).attr("r", 0.7).attr("fill", getThemeColor("rgba(201,149,107,0.06)", "rgba(160,112,64,0.05)"));
-
-        svg.insert("rect", ":first-child").attr("width", "100%").attr("height", "100%").attr("fill", "url(#gridPattern)");
+        // Arrowhead - smaller, 5x5
+        defs.append("marker").attr("id", "arrowhead").attr("viewBox", "-0 -3 6 6")
+            .attr("refX", 14).attr("refY", 0).attr("orient", "auto")
+            .attr("markerWidth", 5).attr("markerHeight", 5)
+            .append("path").attr("d", "M 0,-2.5 L 5,0 L 0,2.5").attr("fill", "#94A3B8");
 
         // Process links
         var nodeById = new Map(nodes.map(function(n) { return [n.id, n]; }));
@@ -1315,8 +1110,18 @@
         function curvedLinkPath(d) {
             var sx = d.source.x, sy = d.source.y, tx = d.target.x, ty = d.target.y;
             var dx = tx - sx, dy = ty - sy;
-            var dr = Math.sqrt(dx * dx + dy * dy) * 0.9;
+            var dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
             return "M" + sx + "," + sy + "A" + dr + "," + dr + " 0 0,1 " + tx + "," + ty;
+        }
+
+        // ============ CONTRAST HELPER ============
+        function getContrastColor(hexColor) {
+            var hex = hexColor.replace('#', '');
+            var r = parseInt(hex.substring(0,2), 16);
+            var g = parseInt(hex.substring(2,4), 16);
+            var b = parseInt(hex.substring(4,6), 16);
+            var luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return luminance > 0.55 ? '#1A1A2E' : '#FFFFFF';
         }
 
         function renderBubbles() {
@@ -1351,7 +1156,7 @@
                     .on("end", function(e, d) { delete d._startRadius; delete d._startY; saveBubbles(); }));
             bubble.append("text").attr("class", "delete-handle").attr("x", 0)
                 .attr("y", function(d) { return -(d.radius || 100) - 5; })
-                .attr("text-anchor", "middle").attr("fill", "#c45b52").attr("font-size", "16px").attr("cursor", "pointer")
+                .attr("text-anchor", "middle").attr("fill", "#EF4444").attr("font-size", "16px").attr("cursor", "pointer")
                 .text("\u2715")
                 .on("click", function(e, d) {
                     e.stopPropagation();
@@ -1366,16 +1171,55 @@
             linkLabelGroup.selectAll("*").remove();
             nodeGroup.selectAll("*").remove();
 
+            // Update arrowhead color for theme
+            var arrow = document.querySelector('#arrowhead path');
+            if (arrow) arrow.setAttribute('fill', getThemeColor('#64748B', '#94A3B8'));
+
             var validLinks = links.filter(function(l) { return l.source && l.target; });
 
+            var linkStroke = getThemeColor('#475569', '#94A3B8');
+
             var link = linkGroup.selectAll("path").data(validLinks).enter().append("path")
-                .attr("class", "link").attr("stroke", getThemeColor("#5e5b6e", "#b0aca4")).attr("stroke-width", 2)
+                .attr("class", "link").attr("stroke", linkStroke).attr("stroke-width", 1.5)
                 .attr("marker-end", "url(#arrowhead)").attr("d", curvedLinkPath);
 
-            var linkLabel = linkLabelGroup.selectAll("text").data(validLinks).enter().append("text")
-                .attr("class", "link-label").text(function(d) { return d.share; })
-                .attr("x", function(d) { return (d.source.x + d.target.x) / 2; })
-                .attr("y", function(d) { return (d.source.y + d.target.y) / 2 - 8; });
+            // Link labels with pill background
+            var labelBg = getThemeColor('#22252F', '#FFFFFF');
+            var labelBorder = getThemeColor('rgba(255,255,255,0.10)', 'rgba(0,0,0,0.10)');
+            var labelColor = getThemeColor('#F1F5F9', '#1A1A2E');
+
+            var linkLabelG = linkLabelGroup.selectAll("g").data(validLinks).enter().append("g");
+
+            linkLabelG.append("rect").attr("class", "link-pill-bg")
+                .attr("fill", labelBg).attr("stroke", labelBorder).attr("stroke-width", 0.5);
+
+            var linkLabelText = linkLabelG.append("text").attr("class", "link-pill-text")
+                .attr("fill", labelColor)
+                .attr("text-anchor", "middle").attr("dominant-baseline", "central")
+                .text(function(d) { return d.share; });
+
+            // Position link labels
+            linkLabelG.each(function(d) {
+                var gEl = d3.select(this);
+                var mx = (d.source.x + d.target.x) / 2;
+                var my = (d.source.y + d.target.y) / 2 - 6;
+                var textEl = gEl.select("text").node();
+                var bbox = textEl.getBBox();
+                var px = 6, py = 3;
+                gEl.select("rect")
+                    .attr("x", mx - bbox.width / 2 - px)
+                    .attr("y", my - bbox.height / 2 - py)
+                    .attr("width", bbox.width + px * 2)
+                    .attr("height", bbox.height + py * 2);
+                gEl.select("text").attr("x", mx).attr("y", my);
+            });
+
+            // Theme-dependent label card colors
+            var cardBg = getThemeColor('#22252F', '#FFFFFF');
+            var cardBorder = getThemeColor('rgba(255,255,255,0.10)', 'rgba(0,0,0,0.10)');
+            var nameColor = getThemeColor('#F1F5F9', '#1A1A2E');
+            var icoColor = getThemeColor('#94A3B8', '#64748B');
+            var nickColor = getThemeColor('#FBBF24', '#B45309');
 
             var node = nodeGroup.selectAll(".node").data(nodes).enter().append("g").attr("class", "node")
                 .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
@@ -1385,9 +1229,23 @@
                         d.x = e.x; d.y = e.y; d.fx = e.x; d.fy = e.y;
                         d3.select(this).attr("transform", "translate(" + d.x + "," + d.y + ")");
                         link.filter(function(l) { return l.source === d || l.target === d; }).attr("d", curvedLinkPath);
-                        linkLabel.filter(function(l) { return l.source === d || l.target === d; })
-                            .attr("x", function(l) { return (l.source.x + l.target.x) / 2; })
-                            .attr("y", function(l) { return (l.source.y + l.target.y) / 2 - 8; });
+                        // Update link labels
+                        linkLabelG.each(function(l) {
+                            if (l.source === d || l.target === d) {
+                                var gEl = d3.select(this);
+                                var mx = (l.source.x + l.target.x) / 2;
+                                var my = (l.source.y + l.target.y) / 2 - 6;
+                                var textEl = gEl.select("text").node();
+                                var bbox = textEl.getBBox();
+                                var px = 6, py = 3;
+                                gEl.select("rect")
+                                    .attr("x", mx - bbox.width / 2 - px)
+                                    .attr("y", my - bbox.height / 2 - py)
+                                    .attr("width", bbox.width + px * 2)
+                                    .attr("height", bbox.height + py * 2);
+                                gEl.select("text").attr("x", mx).attr("y", my);
+                            }
+                        });
                     })
                     .on("end", function() { savePositions(); }))
                 .on("click", function(e, d) {
@@ -1397,56 +1255,119 @@
                 })
                 .on("mouseover", function(e, d) {
                     var t = document.getElementById("tooltip");
-                    t.textContent = d.name + (d.ico ? " (IČO: " + d.ico + ")" : "");
+                    t.textContent = d.name + (d.ico ? " (I\u010cO: " + d.ico + ")" : "");
                     t.style.left = (e.pageX + 15) + "px"; t.style.top = (e.pageY - 10) + "px";
                     t.classList.add("visible");
-                    d3.select(this).select(".node-core").attr("filter", "url(#glow)");
+                    var c = colors[d.type] || "#6366F1";
+                    d3.select(this).select(".node-core")
+                        .attr("filter", null)
+                        .transition().duration(200)
+                        .attr("r", (sizes[d.type] || 12) + 3);
+                    d3.select(this).select(".node-core").style("filter", "drop-shadow(0 0 6px " + c + ")");
                 })
-                .on("mouseout", function() {
+                .on("mouseout", function(e, d) {
                     document.getElementById("tooltip").classList.remove("visible");
-                    d3.select(this).select(".node-core").attr("filter", null);
+                    d3.select(this).select(".node-core")
+                        .transition().duration(200)
+                        .attr("r", sizes[d.type] || 12);
+                    d3.select(this).select(".node-core").style("filter", null);
                 });
 
-            // Outer decorative ring
-            node.append("circle").attr("class", "node-ring")
-                .attr("r", function(d) { return (sizes[d.type] || 25) + 6; })
-                .attr("stroke", function(d) { return colors[d.type] || "#888"; });
-
-            // Core circle with gradient
+            // Small solid circle (node-core)
             node.append("circle").attr("class", "node-core")
-                .attr("r", function(d) { return sizes[d.type] || 25; })
-                .attr("fill", function(d) { return "url(#grad-" + d.type + ")"; })
-                .attr("stroke", function(d) { return d3.color(colors[d.type] || "#888").darker(0.4); });
+                .attr("r", function(d) { return sizes[d.type] || 12; })
+                .attr("fill", function(d) { return colors[d.type] || "#6366F1"; })
+                .attr("stroke", function(d) { return d3.color(colors[d.type] || "#6366F1").darker(0.3); })
+                .attr("stroke-width", 2);
 
-            // DPH indicator
+            // DPH indicator on node circle
             node.filter(function(d) { return d.dphStatus && dphColors[d.dphStatus]; })
                 .append("circle")
                 .attr("class", function(d) { return "dph-indicator" + (d.dphStatus === "proces" ? " dph-pulse" : ""); })
-                .attr("r", 7)
-                .attr("cx", function(d) { return (sizes[d.type] || 25) * 0.7; })
-                .attr("cy", function(d) { return -(sizes[d.type] || 25) * 0.7; })
+                .attr("r", 6)
+                .attr("cx", function(d) { return (sizes[d.type] || 12) * 0.7; })
+                .attr("cy", function(d) { return -(sizes[d.type] || 12) * 0.7; })
                 .attr("fill", function(d) { return dphColors[d.dphStatus]; });
 
-            node.append("text").attr("dy", -5).attr("text-anchor", "middle")
-                .text(function(d) { return d.name.replace(" s.r.o.", "").replace(", s.r.o.", "").split(" ").slice(0, 2).join(" "); });
-            node.append("text").attr("class", "ico").attr("dy", 10).attr("text-anchor", "middle")
-                .text(function(d) { return d.ico || ""; });
-            node.append("text").attr("class", "nickname").attr("dy", 25).attr("text-anchor", "middle")
-                .text(function(d) { return d.nickname || ""; }).style("cursor", "text");
+            // Label card: background rect + texts
+            var labelOffset = function(d) { return (sizes[d.type] || 12) + 8; };
 
+            // Compute display name (strip s.r.o., truncate)
+            function displayName(d) {
+                return d.name.replace(" s.r.o.", "").replace(", s.r.o.", "").split(" ").slice(0, 2).join(" ");
+            }
+
+            // First pass: add texts to measure
+            node.append("text").attr("class", "label-name")
+                .attr("y", function(d) { return labelOffset(d) + 14; })
+                .attr("text-anchor", "middle")
+                .attr("fill", nameColor)
+                .text(function(d) { return displayName(d); });
+
+            node.append("text").attr("class", "label-ico")
+                .attr("y", function(d) { return labelOffset(d) + 28; })
+                .attr("text-anchor", "middle")
+                .attr("fill", icoColor)
+                .text(function(d) { return d.ico || ""; });
+
+            node.append("text").attr("class", "label-nick")
+                .attr("y", function(d) { return labelOffset(d) + 41; })
+                .attr("text-anchor", "middle")
+                .attr("fill", nickColor)
+                .text(function(d) { return d.nickname || ""; })
+                .style("cursor", "text");
+
+            // Second pass: measure and add background rect behind texts
+            node.each(function(d) {
+                var gEl = d3.select(this);
+                var nameEl = gEl.select(".label-name").node();
+                var icoEl = gEl.select(".label-ico").node();
+                var nickEl = gEl.select(".label-nick").node();
+
+                var nameBBox = nameEl.getBBox();
+                var icoBBox = icoEl.getBBox();
+                var nickBBox = nickEl.getBBox();
+
+                // Find max width and total height
+                var maxW = Math.max(nameBBox.width, icoBBox.width, nickBBox.width, 50);
+                var hasIco = d.ico && d.ico.length > 0;
+                var hasNick = d.nickname && d.nickname.length > 0;
+                var cardH = 20; // name line
+                if (hasIco) cardH += 14;
+                if (hasNick) cardH += 14;
+                var padX = 10, padY = 6;
+
+                var cardTop = labelOffset(d) + 2;
+
+                // Insert rect BEFORE the texts
+                gEl.insert("rect", ".label-name")
+                    .attr("class", "label-card-bg")
+                    .attr("x", -(maxW / 2 + padX))
+                    .attr("y", cardTop - padY)
+                    .attr("width", maxW + padX * 2)
+                    .attr("height", cardH + padY * 2)
+                    .attr("fill", cardBg)
+                    .attr("stroke", cardBorder)
+                    .attr("stroke-width", 0.5)
+                    .attr("rx", 6).attr("ry", 6)
+                    .attr("filter", "drop-shadow(0 1px 2px rgba(0,0,0,0.08))");
+            });
+
+            // DblClick nickname edit
             node.on("dblclick", function(e, d) {
                 e.stopPropagation();
                 if (window.activeEditor) { window.activeEditor.remove(); window.activeEditor = null; }
                 var nodeEl = d3.select(this);
-                var nodeSize = sizes[d.type] || 25;
-                var fo = nodeEl.append("foreignObject").attr("x", -45).attr("y", nodeSize + 5).attr("width", 90).attr("height", 25);
+                var yPos = labelOffset(d) + 46;
+                var fo = nodeEl.append("foreignObject").attr("x", -50).attr("y", yPos).attr("width", 100).attr("height", 25);
                 var input = fo.append("xhtml:input").attr("type", "text").attr("class", "nickname-input")
                     .attr("placeholder", "nickname...").attr("value", d.nickname || "").node();
                 window.activeEditor = fo;
                 setTimeout(function() { input.focus(); }, 10);
                 function saveNicknameEdit() {
-                    d.nickname = input.value.trim(); nodeEl.select(".nickname").text(d.nickname);
+                    d.nickname = input.value.trim(); nodeEl.select(".label-nick").text(d.nickname);
                     saveNicknames(); fo.remove(); window.activeEditor = null;
+                    render();
                 }
                 input.addEventListener("keydown", function(ke) {
                     if (ke.key === "Enter") saveNicknameEdit();
@@ -1476,7 +1397,7 @@
             var typeSpan = document.createElement("div");
             typeSpan.className = "detail-type";
             typeSpan.style.background = colors[d.type] || "#888";
-            typeSpan.style.color = (d.type === "subholding" || d.type === "external" || d.type === "person") ? getThemeColor("#1a1a2e", "#1a1a2e") : "#fff";
+            typeSpan.style.color = getContrastColor(colors[d.type] || "#888");
             typeSpan.textContent = typeLabels[d.type] || d.type;
             header.appendChild(typeSpan);
 
@@ -1488,7 +1409,7 @@
             if (d.ico) {
                 var icoDiv = document.createElement("div");
                 icoDiv.className = "detail-ico";
-                icoDiv.textContent = "IČO: " + d.ico;
+                icoDiv.textContent = "I\u010cO: " + d.ico;
                 header.appendChild(icoDiv);
             }
 
@@ -1512,7 +1433,7 @@
 
             content.appendChild(header);
 
-            // Action buttons right after header
+            // Action buttons
             var actions = document.createElement("div");
             actions.className = "detail-actions";
             actions.style.marginBottom = "22px";
@@ -1522,7 +1443,7 @@
             actions.appendChild(editBtn);
 
             if (d.type !== "person") {
-                var ownerBtn = createIconButton(ICON_LINK, 'Změnit vlastníka', 'detail-btn change-owner');
+                var ownerBtn = createIconButton(ICON_LINK, 'Zm\u011bnit vlastn\u00edka', 'detail-btn change-owner');
                 ownerBtn.onclick = function() { openOwnerModal(d); };
                 actions.appendChild(ownerBtn);
 
@@ -1543,8 +1464,8 @@
             if (d.type !== "person") {
                 var section = document.createElement("div");
                 section.className = "detail-section";
-                var h3 = document.createElement("h3"); h3.textContent = "Základní údaje"; section.appendChild(h3);
-                [["Sídlo", d.sidlo], ["Založeno", d.founded], ["Základní kapitál", d.kapital], ["Předmět činnosti", d.cinnost]].forEach(function(pair) {
+                var h3 = document.createElement("h3"); h3.textContent = "Z\u00e1kladn\u00ed \u00fadaje"; section.appendChild(h3);
+                [["S\u00eddlo", d.sidlo], ["Zalo\u017eeno", d.founded], ["Z\u00e1kladn\u00ed kapit\u00e1l", d.kapital], ["P\u0159edm\u011bt \u010dinnosti", d.cinnost]].forEach(function(pair) {
                     if (pair[1]) {
                         var row = document.createElement("div"); row.className = "detail-row";
                         var lbl = document.createElement("span"); lbl.className = "detail-row-label"; lbl.textContent = pair[0];
@@ -1563,7 +1484,7 @@
             }
             if (chain.length > 0) {
                 var cs = document.createElement("div"); cs.className = "detail-section";
-                var h3c = document.createElement("h3"); h3c.textContent = "Vlastnický řetězec"; cs.appendChild(h3c);
+                var h3c = document.createElement("h3"); h3c.textContent = "Vlastnick\u00fd \u0159et\u011bzec"; cs.appendChild(h3c);
                 var cd = document.createElement("div"); cd.className = "ownership-chain";
                 chain.forEach(function(c) {
                     var item = document.createElement("div"); item.className = "ownership-item"; item.textContent = c.name;
@@ -1579,11 +1500,11 @@
             var subs = links.filter(function(l) { return l.source && l.source.id === d.id; }).map(function(l) { return { name: l.target.name, share: l.share }; });
             if (subs.length > 0) {
                 var ss = document.createElement("div"); ss.className = "detail-section";
-                var h3s = document.createElement("h3"); h3s.textContent = "Vlastní (" + subs.length + ")"; ss.appendChild(h3s);
+                var h3s = document.createElement("h3"); h3s.textContent = "Vlastn\u00ed (" + subs.length + ")"; ss.appendChild(h3s);
                 subs.forEach(function(s) {
                     var row = document.createElement("div"); row.className = "detail-row";
                     var lbl = document.createElement("span"); lbl.className = "detail-row-label"; lbl.textContent = s.name;
-                    var val = document.createElement("span"); val.className = "detail-row-value"; val.style.color = getThemeColor("#c9956b", "#a07040"); val.textContent = s.share;
+                    var val = document.createElement("span"); val.className = "detail-row-value"; val.style.color = getThemeColor("#FBBF24", "#B45309"); val.textContent = s.share;
                     row.appendChild(lbl); row.appendChild(val); ss.appendChild(row);
                 });
                 content.appendChild(ss);
@@ -1597,7 +1518,7 @@
 
         function populateOwnerSelect(sel, excludeId) {
             while (sel.firstChild) sel.removeChild(sel.firstChild);
-            var empty = document.createElement("option"); empty.value = ""; empty.textContent = "-- Bez vlastníka (nezávislá) --"; sel.appendChild(empty);
+            var empty = document.createElement("option"); empty.value = ""; empty.textContent = "-- Bez vlastn\u00edka (nez\u00e1visl\u00e1) --"; sel.appendChild(empty);
             nodes.forEach(function(n) {
                 if (n.id !== excludeId) { var o = document.createElement("option"); o.value = n.id; o.textContent = n.name; sel.appendChild(o); }
             });
@@ -1605,7 +1526,7 @@
 
         function openAddModal() {
             editingNode = null;
-            document.getElementById("modalTitle").textContent = "Přidat firmu";
+            document.getElementById("modalTitle").textContent = "P\u0159idat firmu";
             document.getElementById("modalName").value = "";
             document.getElementById("modalIco").value = "";
             document.getElementById("modalType").value = "daughter";
@@ -1635,7 +1556,7 @@
 
         function saveModal() {
             var name = document.getElementById("modalName").value.trim();
-            if (!name) { showDialog("Název firmy je povinný!", { type: 'alert' }); return; }
+            if (!name) { showDialog("N\u00e1zev firmy je povinn\u00fd!", { type: 'alert' }); return; }
             var type = document.getElementById("modalType").value;
             var ico = document.getElementById("modalIco").value.trim();
             var sidlo = document.getElementById("modalSidlo").value.trim();
@@ -1690,7 +1611,7 @@
         }
 
         function disconnectNode(d) {
-            showDialog("Odpojit firmu " + d.name + " od vlastníka?", { confirmText: 'Odpojit', danger: true }).then(function(ok) {
+            showDialog("Odpojit firmu " + d.name + " od vlastn\u00edka?", { confirmText: 'Odpojit', danger: true }).then(function(ok) {
                 if (!ok) return;
                 var li = links.findIndex(function(l) { return l.target && l.target.id === d.id; });
                 if (li >= 0) { links.splice(li, 1); saveData(); render(); showDetail(d); }
@@ -1698,7 +1619,7 @@
         }
 
         function deleteNode(d) {
-            showDialog("Opravdu smazat firmu " + d.name + "?\n\nToto také smaže všechny vazby na tuto firmu!", { confirmText: 'Smazat', danger: true }).then(function(ok) {
+            showDialog("Opravdu smazat firmu " + d.name + "?\n\nToto tak\u00e9 sma\u017ee v\u0161echny vazby na tuto firmu!", { confirmText: 'Smazat', danger: true }).then(function(ok) {
                 if (!ok) return;
                 for (var i = links.length - 1; i >= 0; i--) {
                     if ((links[i].source && links[i].source.id === d.id) || (links[i].target && links[i].target.id === d.id)) links.splice(i, 1);
@@ -1712,7 +1633,7 @@
 
         // ============ BUBBLE MODAL ============
         var editingBubble = null;
-        var selectedBubbleColor = "#5b6abf";
+        var selectedBubbleColor = "#6366F1";
 
         function openBubbleModal(bubble) {
             editingBubble = bubble || null;
@@ -1722,9 +1643,9 @@
                 document.getElementById("bubbleName").value = bubble.name;
                 selectedBubbleColor = bubble.color; del.style.display = "block";
             } else {
-                document.getElementById("bubbleModalTitle").textContent = "Přidat bublinu";
+                document.getElementById("bubbleModalTitle").textContent = "P\u0159idat bublinu";
                 document.getElementById("bubbleName").value = "";
-                selectedBubbleColor = "#5b6abf"; del.style.display = "none";
+                selectedBubbleColor = "#6366F1"; del.style.display = "none";
             }
             document.querySelectorAll(".bubble-color-option").forEach(function(el) {
                 el.classList.toggle("selected", el.dataset.color === selectedBubbleColor);
@@ -1734,7 +1655,7 @@
 
         function saveBubbleModal() {
             var name = document.getElementById("bubbleName").value.trim();
-            if (!name) { showDialog("Název bubliny je povinný!", { type: 'alert' }); return; }
+            if (!name) { showDialog("N\u00e1zev bubliny je povinn\u00fd!", { type: 'alert' }); return; }
             if (editingBubble) { editingBubble.name = name; editingBubble.color = selectedBubbleColor; }
             else {
                 bubbles.push({ id: "bubble_" + Date.now(), name: name, color: selectedBubbleColor,
@@ -1781,7 +1702,7 @@
         document.getElementById("zoomOutBtn").onclick = function() { svg.transition().duration(300).call(zoom.scaleBy, 0.7); };
         document.getElementById("resetBtn").onclick = function() { svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity); };
         document.getElementById("resetPosBtn").onclick = function() {
-            showDialog("Resetovat všechny pozice na výchozí hodnoty?", { confirmText: 'Resetovat' }).then(function(ok) {
+            showDialog("Resetovat v\u0161echny pozice na v\u00fdchoz\u00ed hodnoty?", { confirmText: 'Resetovat' }).then(function(ok) {
                 if (ok) { localStorage.removeItem(STORAGE_KEY_POSITIONS); location.reload(); }
             });
         };
@@ -1794,7 +1715,7 @@
             var url = URL.createObjectURL(blob);
             var a = document.createElement('a'); a.href = url; a.download = 'zajicek-holding-backup.json';
             document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-            showToast('Export dokončen - soubor stažen.');
+            showToast('Export dokon\u010den - soubor sta\u017een.');
         };
 
         document.getElementById("importBtn").onclick = function() { document.getElementById("importFile").click(); };
@@ -1809,9 +1730,9 @@
                     if (id.positions) localStorage.setItem(STORAGE_KEY_POSITIONS, id.positions);
                     if (id.nicknames) localStorage.setItem(STORAGE_KEY_NICKNAMES, id.nicknames);
                     if (id.bubbles) localStorage.setItem(STORAGE_KEY_BUBBLES, id.bubbles);
-                    showToast('Data úspěšně importována! Stránka se obnoví.');
+                    showToast('Data \u00fasp\u011b\u0161n\u011b importov\u00e1na! Str\u00e1nka se obnov\u00ed.');
                     setTimeout(function() { location.reload(); }, 1500);
-                } catch (err) { showToast('Chyba při importu: ' + err.message, 'error'); }
+                } catch (err) { showToast('Chyba p\u0159i importu: ' + err.message, 'error'); }
             };
             reader.readAsText(file); e.target.value = '';
         };
