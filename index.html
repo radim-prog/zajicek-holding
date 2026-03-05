@@ -12,10 +12,10 @@
     <style>
         /* ============ LUXURY FINANCIAL ATLAS ============ */
         :root {
-            --bg-deep: #0a0a12;
-            --bg-surface: rgba(14, 14, 24, 0.88);
-            --bg-elevated: rgba(22, 22, 38, 0.92);
-            --bg-input: rgba(0, 0, 0, 0.35);
+            --bg-deep: #1a1a2e;
+            --bg-surface: rgba(30, 30, 52, 0.90);
+            --bg-elevated: rgba(38, 38, 62, 0.94);
+            --bg-input: rgba(10, 10, 20, 0.35);
 
             --copper: #c9956b;
             --copper-bright: #e0b48a;
@@ -38,17 +38,17 @@
             --rose-light: #cc7080;
 
             --text-warm: #e8e2d8;
-            --text-mid: #9e9a92;
-            --text-dim: #6b6878;
-            --text-faint: #4a4758;
+            --text-mid: #b0aca4;
+            --text-dim: #8a8698;
+            --text-faint: #5e5b6e;
             --text-nick: #d4a03c;
 
             --border: rgba(201, 149, 107, 0.12);
             --border-strong: rgba(201, 149, 107, 0.25);
-            --glass-bg: rgba(14, 14, 24, 0.72);
-            --glass-border: rgba(201, 149, 107, 0.15);
+            --glass-bg: rgba(30, 30, 52, 0.75);
+            --glass-border: rgba(201, 149, 107, 0.18);
             --glass-blur: blur(24px);
-            --overlay: rgba(5, 5, 10, 0.82);
+            --overlay: rgba(10, 10, 20, 0.75);
 
             --radius-sm: 6px;
             --radius-md: 10px;
@@ -1175,7 +1175,7 @@
         defs.append("marker").attr("id", "arrowhead").attr("viewBox", "-0 -5 10 10")
             .attr("refX", 20).attr("refY", 0).attr("orient", "auto")
             .attr("markerWidth", 7).attr("markerHeight", 7)
-            .append("path").attr("d", "M 0,-4 L 8,0 L 0,4").attr("fill", "#6b6878");
+            .append("path").attr("d", "M 0,-4 L 8,0 L 0,4").attr("fill", "#8a8698");
 
         // Glow filter
         var glowFilter = defs.append("filter").attr("id", "glow").attr("x", "-50%").attr("y", "-50%").attr("width", "200%").attr("height", "200%");
@@ -1193,7 +1193,7 @@
 
         // Background: subtle cross-hatch grid
         var gridPattern = defs.append("pattern").attr("id", "gridPattern").attr("width", 40).attr("height", 40).attr("patternUnits", "userSpaceOnUse");
-        gridPattern.append("circle").attr("cx", 20).attr("cy", 20).attr("r", 0.6).attr("fill", "rgba(201,149,107,0.04)");
+        gridPattern.append("circle").attr("cx", 20).attr("cy", 20).attr("r", 0.7).attr("fill", "rgba(201,149,107,0.06)");
 
         svg.insert("rect", ":first-child").attr("width", "100%").attr("height", "100%").attr("fill", "url(#gridPattern)");
 
@@ -1266,7 +1266,7 @@
             var validLinks = links.filter(function(l) { return l.source && l.target; });
 
             var link = linkGroup.selectAll("path").data(validLinks).enter().append("path")
-                .attr("class", "link").attr("stroke", "#4a4758").attr("stroke-width", 2)
+                .attr("class", "link").attr("stroke", "#5e5b6e").attr("stroke-width", 2)
                 .attr("marker-end", "url(#arrowhead)").attr("d", curvedLinkPath);
 
             var linkLabel = linkLabelGroup.selectAll("text").data(validLinks).enter().append("text")
@@ -1373,7 +1373,7 @@
             var typeSpan = document.createElement("div");
             typeSpan.className = "detail-type";
             typeSpan.style.background = colors[d.type] || "#888";
-            typeSpan.style.color = (d.type === "subholding" || d.type === "external" || d.type === "person") ? "#0a0a12" : "#fff";
+            typeSpan.style.color = (d.type === "subholding" || d.type === "external" || d.type === "person") ? "#1a1a2e" : "#fff";
             typeSpan.textContent = typeLabels[d.type] || d.type;
             header.appendChild(typeSpan);
 
