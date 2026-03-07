@@ -686,6 +686,7 @@
         <div class="header-stats">
             <div class="stat"><div class="stat-value" id="statCount">0</div><div class="stat-label">Aktivnich firem</div></div>
             <div class="stat"><div class="stat-value" id="statLevels">0</div><div class="stat-label">Urovne</div></div>
+            <div class="stat sync-status" id="syncStatus" style="opacity:0;transition:opacity 0.3s"><div class="stat-value" style="font-size:12px" id="syncText">Saved</div><div class="stat-label">Notion</div></div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Prepnout svetly/tmavy rezim">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -971,7 +972,9 @@
             { id: "carmakler", name: "CAR makl\u00e9\u0159, s.r.o.", type: "granddaughter", ico: "21957151", sidlo: "\u0160kolsk\u00e1 660/3, Praha", founded: "23.8.2024", kapital: "1 000 K\u010d", cinnost: "Obchod a slu\u017eby", popis: "Automotive makl\u00e9\u0159stv\u00ed", nickname: "", dphStatus: "platce" },
             { id: "novira", name: "Novira Servis Group s.r.o.", type: "granddaughter", ico: "24111929", sidlo: "\u0160kolsk\u00e1 660/3, Praha", founded: "1.1.2026", kapital: "20 000 K\u010d", cinnost: "Reality, poradenstv\u00ed", popis: "Servisn\u00ed skupina - nov\u00e1 firma 2026", nickname: "Viktor II", dphStatus: "neplatce" },
             { id: "alvento", name: "Alvento Solutions s.r.o.", type: "granddaughter", ico: "24111953", sidlo: "\u0160kolsk\u00e1 660/3, Praha", founded: "1.1.2026", kapital: "20 000 K\u010d", cinnost: "Reality, obchod", popis: "Solutions firma - nov\u00e1 firma 2026", nickname: "Viktor", dphStatus: "neplatce" },
-            { id: "carmakler_ins", name: "CAR makl\u00e9\u0159 insurance s.r.o.", type: "external", ico: "", sidlo: "", founded: "", kapital: "", cinnost: "Poji\u0161t\u011bn\u00ed", popis: "Vlastn\u00ed man\u017eelka - pl\u00e1novan\u00e9 p\u0159ipojen\u00ed pod CAR makl\u00e9\u0159", nickname: "", dphStatus: "neplatce" }
+            { id: "carmakler_ins", name: "CAR makl\u00e9\u0159 insurance s.r.o.", type: "external", ico: "", sidlo: "", founded: "", kapital: "", cinnost: "Poji\u0161t\u011bn\u00ed", popis: "Vlastn\u00ed man\u017eelka - pl\u00e1novan\u00e9 p\u0159ipojen\u00ed pod CAR makl\u00e9\u0159", nickname: "", dphStatus: "neplatce" },
+            { id: "stde_servis", name: "St@de servis, s.r.o.", type: "standalone", ico: "19896727", sidlo: "Nov\u00e9 sady 988/2, Brno", founded: "6.11.2023", kapital: "", cinnost: "Stavebnictv\u00ed, pron\u00e1jem nemovitost\u00ed", popis: "\u010c\u00e1ste\u010dn\u011b vlastn\u011bn\u00e1 - servisn\u00ed firma", nickname: "", dphStatus: "platce" },
+            { id: "dluhova_vyzva", name: "Dluhov\u00e1 v\u00fdzva s.r.o.", type: "standalone", ico: "24113468", sidlo: "Nov\u00e9 sady 988/2, Brno", founded: "2.1.2026", kapital: "", cinnost: "Administrativn\u00ed a kancel\u00e1\u0159sk\u00e9 \u010dinnosti", popis: "\u010c\u00e1ste\u010dn\u011b vlastn\u011bn\u00e1", nickname: "", dphStatus: "" }
         ];
 
         var dphColors = { platce: "#10B981", proces: "#F59E0B", neplatce: "#EF4444" };
@@ -991,7 +994,9 @@
             { source: "market4auto", target: "car4auto", share: "100%" },
             { source: "consulting", target: "carmakler", share: "100%" },
             { source: "consulting", target: "novira", share: "100%" },
-            { source: "consulting", target: "alvento", share: "100%" }
+            { source: "consulting", target: "alvento", share: "100%" },
+            { source: "radim", target: "stde_servis", share: "?" },
+            { source: "radim", target: "dluhova_vyzva", share: "?" }
         ];
 
         var defaultPositions = {
@@ -1002,7 +1007,8 @@
             kaldaro: { x: 1238, y: 511 }, kortado: { x: 1412, y: 186 },
             ardono: { x: 488, y: 372 }, car4auto: { x: 1083, y: -177 },
             carmakler: { x: 816, y: 626 }, novira: { x: 475, y: 542 },
-            alvento: { x: 485, y: 461 }, carmakler_ins: { x: 856, y: 688 }
+            alvento: { x: 485, y: 461 }, carmakler_ins: { x: 856, y: 688 },
+            stde_servis: { x: 180, y: -100 }, dluhova_vyzva: { x: 60, y: -50 }
         };
 
         // ============ STORAGE ============
@@ -1033,14 +1039,73 @@
             });
             localStorage.setItem(STORAGE_KEY_NODES, JSON.stringify(nodesToSave));
             localStorage.setItem(STORAGE_KEY_LINKS, JSON.stringify(linksToSave));
+            scheduleSyncToNotion();
         }
 
         function loadPositions() { try { var s = localStorage.getItem(STORAGE_KEY_POSITIONS); return s ? JSON.parse(s) : null; } catch(e) { return null; } }
-        function savePositions() { var p = {}; nodes.forEach(function(n) { p[n.id] = { x: n.x, y: n.y }; }); localStorage.setItem(STORAGE_KEY_POSITIONS, JSON.stringify(p)); }
+        function savePositions() { var p = {}; nodes.forEach(function(n) { p[n.id] = { x: n.x, y: n.y }; }); localStorage.setItem(STORAGE_KEY_POSITIONS, JSON.stringify(p)); scheduleSyncToNotion(); }
         function loadNicknames() { try { var s = localStorage.getItem(STORAGE_KEY_NICKNAMES); return s ? JSON.parse(s) : null; } catch(e) { return null; } }
-        function saveNicknames() { var d = {}; nodes.forEach(function(n) { d[n.id] = n.nickname || ""; }); localStorage.setItem(STORAGE_KEY_NICKNAMES, JSON.stringify(d)); }
+        function saveNicknames() { var d = {}; nodes.forEach(function(n) { d[n.id] = n.nickname || ""; }); localStorage.setItem(STORAGE_KEY_NICKNAMES, JSON.stringify(d)); scheduleSyncToNotion(); }
         function loadBubbles() { try { var s = localStorage.getItem(STORAGE_KEY_BUBBLES); return s ? JSON.parse(s) : []; } catch(e) { return []; } }
-        function saveBubbles() { localStorage.setItem(STORAGE_KEY_BUBBLES, JSON.stringify(bubbles)); }
+        function saveBubbles() { localStorage.setItem(STORAGE_KEY_BUBBLES, JSON.stringify(bubbles)); scheduleSyncToNotion(); }
+
+        // ============ NOTION SYNC ============
+        var _syncTimer = null;
+        var _syncInProgress = false;
+
+        function showSyncStatus(text, persistent) {
+            var el = document.getElementById('syncStatus');
+            var txt = document.getElementById('syncText');
+            txt.textContent = text;
+            el.style.opacity = '1';
+            if (!persistent) { setTimeout(function() { el.style.opacity = '0'; }, 2500); }
+        }
+
+        function getFullState() {
+            var nodesToSave = nodes.map(function(n) {
+                return { id: n.id, name: n.name, type: n.type, ico: n.ico, sidlo: n.sidlo,
+                    founded: n.founded, kapital: n.kapital, cinnost: n.cinnost, popis: n.popis,
+                    nickname: n.nickname, dphStatus: n.dphStatus || "" };
+            });
+            var linksToSave = links.map(function(l) {
+                return { source: typeof l.source === 'object' ? l.source.id : l.source,
+                    target: typeof l.target === 'object' ? l.target.id : l.target, share: l.share };
+            });
+            var positions = {}; nodes.forEach(function(n) { positions[n.id] = { x: n.x, y: n.y }; });
+            var nicknames = {}; nodes.forEach(function(n) { nicknames[n.id] = n.nickname || ""; });
+            return { nodes: nodesToSave, links: linksToSave, positions: positions, nicknames: nicknames, bubbles: bubbles, savedAt: new Date().toISOString() };
+        }
+
+        function scheduleSyncToNotion() {
+            if (_syncTimer) clearTimeout(_syncTimer);
+            _syncTimer = setTimeout(syncToNotion, 2000);
+        }
+
+        function syncToNotion() {
+            if (_syncInProgress) { scheduleSyncToNotion(); return; }
+            _syncInProgress = true;
+            showSyncStatus('Saving...', true);
+            fetch('/api/state', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(getFullState())
+            }).then(function(r) {
+                _syncInProgress = false;
+                if (r.ok) { showSyncStatus('\u2713 Saved'); }
+                else { r.json().then(function(d) { console.error('Sync error:', d); showSyncStatus('\u2717 Error'); }); }
+            }).catch(function(e) {
+                _syncInProgress = false;
+                console.error('Sync failed:', e);
+                showSyncStatus('\u2717 Offline');
+            });
+        }
+
+        function loadFromNotion() {
+            return fetch('/api/state').then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            });
+        }
 
         // ============ INIT DATA ============
         var data = loadData();
@@ -1378,6 +1443,44 @@
 
         render();
         renderBubbles();
+
+        // ============ NOTION INITIAL LOAD ============
+        loadFromNotion().then(function(state) {
+            if (!state || !state.nodes || !state.links) return;
+            // Replace current data with Notion data
+            nodes.length = 0;
+            state.nodes.forEach(function(n) { nodes.push(n); });
+            links.length = 0;
+            state.links.forEach(function(l) { links.push(l); });
+            if (state.bubbles) { bubbles.length = 0; state.bubbles.forEach(function(b) { bubbles.push(b); }); }
+            // Rebuild nodeById
+            nodeById.clear();
+            nodes.forEach(function(n) { nodeById.set(n.id, n); });
+            // Apply positions
+            var pos = state.positions || {};
+            nodes.forEach(function(n) {
+                if (pos[n.id]) { n.x = pos[n.id].x; n.y = pos[n.id].y; }
+                else if (defaultPositions[n.id]) { n.x = defaultPositions[n.id].x; n.y = defaultPositions[n.id].y; }
+                else { n.x = centerX + (Math.random() - 0.5) * 200; n.y = 400 + (Math.random() - 0.5) * 200; }
+                n.fx = n.x; n.fy = n.y;
+            });
+            // Apply nicknames
+            if (state.nicknames) {
+                nodes.forEach(function(n) { if (state.nicknames[n.id]) n.nickname = state.nicknames[n.id]; });
+            }
+            // Resolve link references
+            links.forEach(function(l) {
+                if (typeof l.source === 'string') l.source = nodeById.get(l.source);
+                if (typeof l.target === 'string') l.target = nodeById.get(l.target);
+            });
+            // Save to localStorage as cache
+            saveData(); savePositions();
+            // Re-render
+            render(); renderBubbles(); updateStats();
+            showSyncStatus('\u2713 Loaded');
+        }).catch(function(e) {
+            console.log('Notion load skipped (offline or not configured):', e.message);
+        });
 
         // ============ DETAIL PANEL ============
         var currentDetailNode = null;
